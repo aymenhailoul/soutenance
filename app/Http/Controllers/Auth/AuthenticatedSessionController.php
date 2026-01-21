@@ -28,7 +28,9 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Use an explicit redirect to dashboard. If sessions aren't persisting,
+        // the auth middleware will bounce back to /login (which we can then debug).
+        return redirect()->route('dashboard');
     }
 
     /**
