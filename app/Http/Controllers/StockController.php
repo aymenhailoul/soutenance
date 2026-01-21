@@ -22,7 +22,7 @@ class StockController extends Controller
     public function searchProducts(Request $request)
     {
         $search = $request->get('search', '');
-        
+
         $products = Product::query()
             ->where('name', 'like', "%{$search}%")
             ->orderBy('name')
@@ -40,6 +40,23 @@ class StockController extends Controller
             'quantity' => ['required', 'integer', 'min:1'],
             'comment' => ['nullable', 'string', 'max:500'],
         ]);
+
+        // Pre-check stock availability for Sortie operations
+        if ($validated['movement'] === 'Sortie') {
+            $stock = DB::table('stock')
+                ->where('product_id', $validated['product_id'])
+                ->first();
+
+            if (!$stock) {
+                $product = Product::find($validated['product_id']);
+                return back()->with('error', 'Cannot perform stock removal: "' . $product->name . '" has no stock available.');
+            }
+
+            if ($stock->quantity < $validated['quantity']) {
+                $product = Product::find($validated['product_id']);
+                return back()->with('error', 'Insufficient stock for "' . $product->name . '". Available: ' . $stock->quantity . ', Requested: ' . $validated['quantity'] . '.');
+            }
+        }
 
         DB::transaction(function () use ($validated) {
             // Create stock movement
@@ -62,25 +79,16 @@ class StockController extends Controller
                     ? $stock->quantity + $validated['quantity']
                     : $stock->quantity - $validated['quantity'];
 
-                // Prevent negative stock
-                if ($newQuantity < 0) {
-                    throw new \Exception('Insufficient stock quantity.');
-                }
-
                 DB::table('stock')
                     ->where('product_id', $validated['product_id'])
                     ->update(['quantity' => $newQuantity]);
             } else {
-                // Create stock entry if it doesn't exist
-                if ($validated['movement'] === 'Entrée') {
-                    DB::table('stock')->insert([
-                        'product_id' => $validated['product_id'],
-                        'quantity' => $validated['quantity'],
-                        'updated_at' => now(),
-                    ]);
-                } else {
-                    throw new \Exception('Cannot perform Sortie: product has no stock.');
-                }
+                // Create stock entry if it doesn't exist (only for Entrée)
+                DB::table('stock')->insert([
+                    'product_id' => $validated['product_id'],
+                    'quantity' => $validated['quantity'],
+                    'updated_at' => now(),
+                ]);
             }
         });
 
@@ -98,7 +106,7 @@ class StockController extends Controller
         ]);
     }
 
-    public function exportMovements(): Response
+    public function exportMovements()
     {
         $movements = StockMovement::with(['product', 'user'])
             ->orderBy('created_at', 'desc')
@@ -116,10 +124,10 @@ class StockController extends Controller
 
         $callback = function () use ($movements) {
             $file = fopen('php://output', 'w');
-            
+
             // Add BOM for UTF-8 Excel compatibility
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-            
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
             // Headers
             fputcsv($file, ['Type', 'Product', 'Quantity', 'Date', 'Time', 'User', 'Comment']);
 
