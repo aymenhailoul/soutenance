@@ -15,11 +15,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Create a default super admin user if none exist
+        User::firstOrCreate(
+            ['name' => 'admin'],
+            [
+                'password' => 'admin123', // will be hashed automatically by the model cast
+                'role' => 'Super User',
+            ]
+        );
     }
 }

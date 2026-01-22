@@ -18,7 +18,9 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    // Force file sessions to avoid DB/session persistence issues during local dev.
+    // (DB sessions can cause "login succeeds but redirects back to /login" if sessions table/connection isn't stable.)
+    'driver' => 'file',
 
     /*
     |--------------------------------------------------------------------------

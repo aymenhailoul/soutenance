@@ -24,11 +24,9 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
+            'name' => fake()->userName(),
             'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'role' => fake()->randomElement(['Admin', 'Super User', 'User']),
         ];
     }
 
@@ -38,7 +36,7 @@ class UserFactory extends Factory
     public function unverified(): static
     {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            // No-op for now – email is not used on the User model
         ]);
     }
 }
