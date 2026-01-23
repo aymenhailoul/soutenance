@@ -99,7 +99,7 @@ class StockController extends Controller
     {
         $movements = StockMovement::with(['product', 'user'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10);
 
         return view('stock.movements', [
             'movements' => $movements,

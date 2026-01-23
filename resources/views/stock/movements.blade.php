@@ -71,5 +71,9 @@
                 </table>
             </div>
         </div>
+
+        <div class="mt-4">
+            {{ $movements->links() }}
+        </div>
     </div>
 @endsection

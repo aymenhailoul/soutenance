@@ -55,15 +55,14 @@
 
         <!-- Buttons -->
         <div class="flex gap-4">
-            <button class="bg-blue-600 text-white px-6 py-3 rounded-lg"
-            onclick="return confirm('Are you sure you want to update this product?')">
+            <x-button variant="primary" type="submit"
+            onclick="return confirm('Are you sure you want to update this product?')">          
                 Update
-            </button>
+           </x-button>
 
-            <a href="{{ route('products.index') }}"
-               class="px-6 py-3 rounded-lg bg-gray-200">
-                Cancel
-            </a>
+            <x-button variant="secondary" href="{{ route('products.index') }}">
+                Annuler
+            </x-button> 
         </div>
     </form>
 </div>

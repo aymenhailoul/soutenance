@@ -5,7 +5,7 @@
 @section('content')
 <div class="p-8">
     <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-900">Produits</h1>
+        <h1 class="text-3xl font-bold text-gray-900">Produits et Services</h1>
     </div>
 
     {{-- Success / Errors (same style as clients page) --}}
@@ -29,7 +29,7 @@
     <div class="bg-white rounded-lg shadow overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-200 flex flex-col gap-4">
             <div class="flex items-center justify-between gap-4">
-                <h2 class="text-lg font-semibold text-gray-900">Liste des produits</h2>
+                <h2 class="text-lg font-semibold text-gray-900">Liste des produits et services</h2>
 
                 <div class="flex items-center gap-3">
                     
@@ -58,7 +58,7 @@
             <div class="flex items-center gap-3">
                 <div class="relative flex-1 max-w-md">
                     <label class="block text-sm font-semibold text-gray-900 mb-2" for="product-search">
-                        Rechercher produit
+                        Rechercher produit ou service
                     </label>
                     <div class="relative">
                         <input type="text" id="product-search" autocomplete="off" placeholder="Taper nom ou code produit"
@@ -89,7 +89,7 @@
             <table class="min-w-full">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Produit</th>
+                        <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Nom</th>
                         <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Type</th>
                         <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Prix Achat</th>
                         <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Prix Vente</th>
@@ -115,7 +115,7 @@
         </div>
     </div>
 
-    <!-- Pagination (hidden automatically during live search) -->
+    <!-- Pagination -->
     <div class="mt-6">
         {{ $products->links() }}
     </div>
