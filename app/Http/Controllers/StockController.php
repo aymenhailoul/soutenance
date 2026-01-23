@@ -108,45 +108,9 @@ class StockController extends Controller
 
     public function exportMovements()
     {
-        $movements = StockMovement::with(['product', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $filename = 'stock_movements_' . date('Y-m-d_His') . '.csv';
-
-        $headers = [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
-        ];
-
-        $callback = function () use ($movements) {
-            $file = fopen('php://output', 'w');
-
-            // Add BOM for UTF-8 Excel compatibility
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
-
-            // Headers
-            fputcsv($file, ['Type', 'Product', 'Quantity', 'Date', 'Time', 'User', 'Comment']);
-
-            // Data rows
-            foreach ($movements as $movement) {
-                fputcsv($file, [
-                    $movement->movement,
-                    $movement->product->name ?? 'N/A',
-                    $movement->quantity,
-                    $movement->created_at->format('Y-m-d'),
-                    $movement->created_at->format('H:i'),
-                    $movement->user->name ?? 'N/A',
-                    $movement->comment ?? '',
-                ]);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\StockMovementsExport(),
+            'mouvements_stock_' . date('Y-m-d_His') . '.xlsx'
+        );
     }
 }

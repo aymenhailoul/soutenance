@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductController;
 
 Route::middleware('auth')->group(function () {
     Route::get('/', function () {
@@ -36,6 +37,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/stock', [StockController::class, 'store'])->name('stock.store');
     Route::get('/stock/movements', [StockController::class, 'movements'])->name('stock.movements');
     Route::get('/stock/movements/export', [StockController::class, 'exportMovements'])->name('stock.movements.export');
+
+    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/products/export/{format}', [ProductController::class, 'export'])
+    ->whereIn('format', ['xlsx'])
+    ->name('products.export');
+
+Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+
 });
 
 

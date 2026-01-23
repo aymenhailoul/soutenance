@@ -6,15 +6,15 @@
     <div class="p-8">
         <div class="mb-6 flex items-center justify-between">
             <div>
-                <h1 class="text-3xl font-bold text-gray-900">Stock Movements</h1>
-                <p class="text-gray-600 mt-1">View all stock entry and exit movements</p>
+                <h1 class="text-3xl font-bold text-gray-900">Stock Mouvements</h1>
+                <p class="text-gray-600 mt-1">Liste des mouvements de stock</p>
             </div>
             <a href="{{ route('stock.movements.export') }}">
                 <x-button variant="success" type="button">
                     <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
-                    Export
+                    Exporter
                 </x-button>
             </a>
         </div>
@@ -26,10 +26,10 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Type</th>
-                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Product</th>
-                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Quantity</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Produit</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Quantité</th>
                             <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Date</th>
-                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Comment</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Motif</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
