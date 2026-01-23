@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="p-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">home</h1>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Home</h1>
         
         <div class="bg-white rounded-lg shadow p-6 mb-8">
             <h2 class="text-xl font-semibold mb-2">Welcome, User</h2>

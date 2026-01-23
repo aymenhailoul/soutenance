@@ -27,13 +27,13 @@
         <!-- Clients List -->
         <div class="bg-white rounded-lg shadow overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900">Client List</h2>
+                <h2 class="text-lg font-semibold text-gray-900">Liste des clients</h2>
                 <x-button
                     variant="primary"
                     type="button"
                     onclick="document.getElementById('add-client-modal').classList.remove('hidden')"
                 >
-                    Add Client
+                    Ajouter un client
                 </x-button>
             </div>
 
@@ -41,21 +41,21 @@
                 <table class="min-w-full">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Name</th>
-                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Prenom</th>
-                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Phone</th>
-                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Car Brand</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Nom</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Prénom</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Téléphone</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Marque Voiture</th>
                             <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Matricule</th>
-                            <th class="text-right px-6 py-3 text-sm font-semibold text-gray-700">Actions</th>
+                            <th class="text-right px-12 py-3 text-sm font-semibold text-gray-700">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         @forelse ($clients as $client)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-gray-900">{{ $client->name }}</div>
+                                    <div class="font-medium text-gray-900 capitalize">{{ $client->name }}</div>
                                 </td>
-                                <td class="px-6 py-4 text-gray-700">
+                                <td class="font-medium px-6 py-4 text-gray-900 capitalize">
                                     {{ $client->prenom }}
                                 </td>
                                 <td class="px-6 py-4 text-gray-700">
@@ -88,7 +88,7 @@
                                         >
                                             <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl mx-4">
                                                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                                                    <h2 class="text-lg font-semibold text-gray-900">Update Client</h2>
+                                                    <h2 class="text-lg font-semibold text-gray-900">Modifier Client</h2>
                                                     <button
                                                         type="button"
                                                         class="text-gray-400 hover:text-gray-600"
@@ -105,7 +105,7 @@
 
                                                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                             <div>
-                                                                <label class="block text-sm font-semibold text-gray-900 mb-2">Name</label>
+                                                                <label class="block text-sm font-semibold text-gray-900 mb-2">Nom</label>
                                                                 <input
                                                                     name="name"
                                                                     value="{{ old('name', $client->name) }}"
@@ -115,7 +115,7 @@
                                                             </div>
 
                                                             <div>
-                                                                <label class="block text-sm font-semibold text-gray-900 mb-2">Prenom</label>
+                                                                <label class="block text-sm font-semibold text-gray-900 mb-2">Prénom</label>
                                                                 <input
                                                                     name="prenom"
                                                                     value="{{ old('prenom', $client->prenom) }}"
@@ -125,7 +125,7 @@
                                                             </div>
 
                                                             <div>
-                                                                <label class="block text-sm font-semibold text-gray-900 mb-2">Phone Number</label>
+                                                                <label class="block text-sm font-semibold text-gray-900 mb-2">Téléphone</label>
                                                                 <input
                                                                     type="tel"
                                                                     name="phone"
@@ -136,7 +136,7 @@
                                                             </div>
 
                                                             <div>
-                                                                <label class="block text-sm font-semibold text-gray-900 mb-2">Car Brand</label>
+                                                                <label class="block text-sm font-semibold text-gray-900 mb-2">Marque Voiture</label>
                                                                 <input
                                                                     name="car_brand"
                                                                     value="{{ old('car_brand', $client->car_brand) }}"
@@ -146,7 +146,7 @@
                                                             </div>
 
                                                             <div>
-                                                                <label class="block text-sm font-semibold text-gray-900 mb-2">Matricule</label>
+                                                                <label class="block text-sm font-semibold text-gray-900 mb-2">Matricule Voiture</label>
                                                                 <input
                                                                     name="matricule"
                                                                     value="{{ old('matricule', $client->matricule) }}"
@@ -179,9 +179,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <x-icon-button title="Delete" variant="danger" type="submit">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3m-4 0h14"></path>
-                                                </svg>
+                                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M2.75 6.16667C2.75 5.70644 3.09538 5.33335 3.52143 5.33335L6.18567 5.3329C6.71502 5.31841 7.18202 4.95482 7.36214 4.41691C7.36688 4.40277 7.37232 4.38532 7.39185 4.32203L7.50665 3.94993C7.5769 3.72179 7.6381 3.52303 7.72375 3.34536C8.06209 2.64349 8.68808 2.1561 9.41147 2.03132C9.59457 1.99973 9.78848 1.99987 10.0111 2.00002H13.4891C13.7117 1.99987 13.9056 1.99973 14.0887 2.03132C14.8121 2.1561 15.4381 2.64349 15.7764 3.34536C15.8621 3.52303 15.9233 3.72179 15.9935 3.94993L16.1083 4.32203C16.1279 4.38532 16.1333 4.40277 16.138 4.41691C16.3182 4.95482 16.8778 5.31886 17.4071 5.33335H19.9786C20.4046 5.33335 20.75 5.70644 20.75 6.16667C20.75 6.62691 20.4046 7 19.9786 7H3.52143C3.09538 7 2.75 6.62691 2.75 6.16667Z" fill="#fe4848"></path> <path d="M11.6068 21.9998H12.3937C15.1012 21.9998 16.4549 21.9998 17.3351 21.1366C18.2153 20.2734 18.3054 18.8575 18.4855 16.0256L18.745 11.945C18.8427 10.4085 18.8916 9.6402 18.45 9.15335C18.0084 8.6665 17.2628 8.6665 15.7714 8.6665H8.22905C6.73771 8.6665 5.99204 8.6665 5.55047 9.15335C5.10891 9.6402 5.15777 10.4085 5.25549 11.945L5.515 16.0256C5.6951 18.8575 5.78515 20.2734 6.66534 21.1366C7.54553 21.9998 8.89927 21.9998 11.6068 21.9998Z" fill="#fe4848"></path> </g></svg>
                                             </x-icon-button>
                                         </form>
                                     </div>
@@ -190,7 +188,7 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="px-6 py-10 text-center text-gray-600">
-                                    No clients found.
+                                    Aucun client trouvé.
                                 </td>
                             </tr>
                         @endforelse
@@ -206,7 +204,7 @@
         >
             <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl mx-4">
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                    <h2 class="text-lg font-semibold text-gray-900">Add Client</h2>
+                    <h2 class="text-lg font-semibold text-gray-900">Ajouter un Client</h2>
                     <button
                         type="button"
                         class="text-gray-400 hover:text-gray-600"
@@ -223,12 +221,12 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                    Name <span class="text-red-600">*</span>
+                                    Nom <span class="text-red-600">*</span>
                                 </label>
                                 <input
                                     name="name"
                                     value="{{ old('name') }}"
-                                    placeholder="Enter name"
+                                    placeholder="Entrer nom"
                                     class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                     required
                                 />
@@ -236,12 +234,12 @@
 
                             <div>
                                 <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                    Prenom <span class="text-red-600">*</span>
+                                    Prénom <span class="text-red-600">*</span>
                                 </label>
                                 <input
                                     name="prenom"
                                     value="{{ old('prenom') }}"
-                                    placeholder="Enter prenom"
+                                    placeholder="Entrer prénom"
                                     class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                     required
                                 />
@@ -249,34 +247,34 @@
 
                             <div>
                                 <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                    Phone Number <span class="text-red-600">*</span>
+                                    Téléphone<span class="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="tel"
                                     name="phone"
                                     value="{{ old('phone') }}"
-                                    placeholder="Enter phone number"
+                                    placeholder="Entrer numéro de téléphone"
                                     class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-900 mb-2">Car Brand</label>
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">Marque Voiture</label>
                                 <input
                                     name="car_brand"
                                     value="{{ old('car_brand') }}"
-                                    placeholder="Enter car brand"
+                                    placeholder="Entrer marque de la voiture"
                                     class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                 />
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-900 mb-2">Matricule</label>
+                                <label class="block text-sm font-semibold text-gray-900 mb-2">Matricule Voiture</label>
                                 <input
                                     name="matricule"
                                     value="{{ old('matricule') }}"
-                                    placeholder="Enter matricule"
+                                    placeholder="Entrer matricule de la voiture"
                                     class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                 />
                             </div>
@@ -288,10 +286,10 @@
                                 type="button"
                                 onclick="document.getElementById('add-client-modal').classList.add('hidden')"
                             >
-                                Cancel
+                                Annuler
                             </x-button>
                             <x-button variant="primary" type="submit">
-                                Add Client
+                                Ajouter Client
                             </x-button>
                         </div>
                     </form>

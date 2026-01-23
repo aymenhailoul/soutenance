@@ -16,4 +16,21 @@ class Product extends Model
         'prix_vente',
         'serial_code',
     ];
+    protected $casts = [
+        'prix_achat' => 'decimal:2',
+        'prix_vente' => 'decimal:2',
+    ];
+
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    // Calculate current stock from movements (Entrée - Sortie)
+    public function getStockAttribute(): int
+    {
+        $entries = (int) $this->stockMovements()->where('movement', 'Entrée')->sum('quantity');
+        $exits = (int) $this->stockMovements()->where('movement', 'Sortie')->sum('quantity');
+        return $entries - $exits;
+    }
 }

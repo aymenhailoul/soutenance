@@ -32,12 +32,12 @@
                 <!-- Action Type Dropdown -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2" for="movement">
-                        Action Type <span class="text-red-600">*</span>
+                        Entrée / Sortie<span class="text-red-600">*</span>
                     </label>
                     <select id="movement" name="movement"
                         class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" required
                         onchange="toggleFormFields()">
-                        <option value="">Select action type</option>
+                        <option value="" class="text-gray-400">Selectionner un type de mouvement</option>
                         <option value="Entrée">Entrée</option>
                         <option value="Sortie">Sortie</option>
                     </select>
@@ -46,7 +46,7 @@
                 <!-- Product Autocomplete Dropdown -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2" for="product-search">
-                        Product <span class="text-red-600">*</span>
+                        Produit <span class="text-red-600">*</span>
                     </label>
                     <div class="relative">
                         <input type="text" id="product-search" autocomplete="off" placeholder="Type to search products..."
@@ -64,7 +64,7 @@
                 <!-- Quantity -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2" for="quantity">
-                        Quantity <span class="text-red-600">*</span>
+                        Quantité <span class="text-red-600">*</span>
                     </label>
                     <input type="number" id="quantity" name="quantity" min="1" value="1" placeholder="Enter quantity"
                         class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" required
@@ -74,9 +74,9 @@
                 <!-- Comment -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2" for="comment">
-                        Comment
+                        Motif
                     </label>
-                    <textarea id="comment" name="comment" rows="3" placeholder="Enter comment (optional)"
+                    <textarea id="comment" name="comment" rows="3" placeholder="Motif de mouvement"
                         class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                         disabled></textarea>
                 </div>
@@ -84,7 +84,7 @@
                 <!-- Approve Button -->
                 <div class="flex justify-end">
                     <x-button variant="primary" type="button" id="approve-btn" onclick="showApprovalModal()" disabled>
-                        Approve
+                        Valider
                     </x-button>
                 </div>
             </form>
