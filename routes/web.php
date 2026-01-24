@@ -7,11 +7,10 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\FacturationController;
+use App\Http\Controllers\VenteController;
 
 Route::middleware('auth')->group(function () {
-    Route::get('/', function () {
-        return view('welcome');
-    })->name('dashboard');
+    Route::get('/', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/_debug/auth', function () {
         return response()->json([
@@ -22,11 +21,13 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('debug.auth');
 
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
-    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::middleware(['admin'])->group(function () {
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+        Route::post('/users', [UserController::class, 'store'])->name('users.store');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    });
 
     Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
     Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
@@ -40,16 +41,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/stock/movements/export', [StockController::class, 'exportMovements'])->name('stock.movements.export');
 
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
-Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
 
-Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-Route::get('/products/export/{format}', [ProductController::class, 'export'])
-    ->whereIn('format', ['xlsx'])
-    ->name('products.export');
+    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::get('/products/export/{format}', [ProductController::class, 'export'])
+        ->whereIn('format', ['xlsx'])
+        ->name('products.export');
 
-Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
-Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
     Route::get('/facturation', [FacturationController::class, 'index'])->name('facturation.index');
     Route::get('/facturation/search-products', [FacturationController::class, 'searchProducts'])->name('facturation.search-products');
@@ -57,9 +58,13 @@ Route::delete('/products/{product}', [ProductController::class, 'destroy'])->nam
     Route::post('/facturation/{invoice}/validate', [FacturationController::class, 'validateInvoice'])->name('facturation.validate');
     Route::get('/facturation/{invoice}/pdf', [FacturationController::class, 'downloadPdf'])->name('facturation.pdf');
 
+    Route::get('/ventes', [VenteController::class, 'index'])->name('ventes.index');
+    Route::get('/ventes/{invoice}', [VenteController::class, 'show'])->name('ventes.show');
+    Route::get('/ventes/export/excel', [VenteController::class, 'export'])->name('ventes.export');
+
 
 });
 
 
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
