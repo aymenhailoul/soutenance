@@ -10,19 +10,63 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <style>
+        /* Sidebar collapse/expand styles */
+        .sidebar {
+            width: 5rem;
+            transition: width 0.3s ease;
+        }
+        .sidebar:hover {
+            width: 18rem;
+        }
+        .sidebar .sidebar-label {
+            opacity: 0;
+            width: 0;
+            transition: opacity 0.2s ease, width 0.3s ease;
+        }
+        .sidebar:hover .sidebar-label {
+            opacity: 1;
+            width: auto;
+        }
+        .sidebar .sidebar-title {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            transition: opacity 0.2s ease;
+        }
+        .sidebar:hover .sidebar-title {
+            opacity: 1;
+            width: auto;
+        }
+        .sidebar .logout-text {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            transition: opacity 0.2s ease;
+        }
+        .sidebar:hover .logout-text {
+            opacity: 1;
+            width: auto;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50">
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="w-72 bg-white border-r border-gray-200 flex flex-col">
+        <aside class="sidebar bg-white border-r border-gray-200 flex flex-col fixed h-full z-30">
             <!-- Logo/Title -->
-            <div class="p-6 border-b border-gray-200">
-                <h1 class="text-xl font-bold text-gray-900">Business Manager</h1>
+            <div class="p-4 border-b border-gray-200 flex items-center justify-center">
+                <svg class="w-8 h-8 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                    </path>
+                </svg>
+                <h1 class="text-xl font-bold text-gray-900 ml-3 sidebar-title">Business Manager</h1>
             </div>
 
             <!-- Navigation -->
-            <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <nav class="flex-1 p-2 space-y-1 overflow-y-auto">
                 <x-nav-button label="Home" route="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -30,8 +74,6 @@
                         </path>
                     </svg>
                 </x-nav-button>
-
-
 
                 <x-nav-button label="Product List" route="/products" :active="request()->is('products')">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,6 +121,22 @@
                     </svg>
                 </x-nav-button>
 
+                <x-nav-button label="Employés" route="/employees" :active="request()->is('employees')">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z">
+                        </path>
+                    </svg>
+                </x-nav-button>
+
+                <x-nav-button label="Charges" route="/charges" :active="request()->is('charges')">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                </x-nav-button>
+
                 @if(auth()->user()->role === 'Admin')
                     <x-nav-button label="Users" route="/users" :active="request()->is('users')">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,24 +149,25 @@
             </nav>
 
             <!-- Logout Button -->
-            <div class="p-4 border-t border-gray-200">
+            <div class="p-2 border-t border-gray-200">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit"
-                        class="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all font-medium">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        class="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all font-medium"
+                        title="Logout">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
                             </path>
                         </svg>
-                        <span>Logout</span>
+                        <span class="logout-text whitespace-nowrap">Logout</span>
                     </button>
                 </form>
             </div>
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1">
+        <main class="flex-1 ml-20 transition-all duration-300">
             @yield('content')
         </main>
     </div>

@@ -4,6 +4,8 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\ChargeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\FacturationController;
@@ -54,14 +56,30 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/facturation', [FacturationController::class, 'index'])->name('facturation.index');
     Route::get('/facturation/search-products', [FacturationController::class, 'searchProducts'])->name('facturation.search-products');
+    Route::get('/facturation/search-clients', [FacturationController::class, 'searchClients'])->name('facturation.search-clients');
     Route::post('/facturation', [FacturationController::class, 'store'])->name('facturation.store');
     Route::post('/facturation/{invoice}/validate', [FacturationController::class, 'validateInvoice'])->name('facturation.validate');
     Route::get('/facturation/{invoice}/pdf', [FacturationController::class, 'downloadPdf'])->name('facturation.pdf');
+    Route::post('/facturation/{invoice}/cancel', [FacturationController::class, 'cancel'])->name('facturation.cancel');
 
     Route::get('/ventes', [VenteController::class, 'index'])->name('ventes.index');
     Route::get('/ventes/{invoice}', [VenteController::class, 'show'])->name('ventes.show');
     Route::get('/ventes/export/excel', [VenteController::class, 'export'])->name('ventes.export');
 
+    // Employee routes
+    Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
+    Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+    Route::get('/employees/export/{format}', [EmployeeController::class, 'export'])
+        ->whereIn('format', ['xlsx'])
+        ->name('employees.export');
+    Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
+    Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
+    Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+
+    // Charge routes
+    Route::get('/charges', [ChargeController::class, 'index'])->name('charges.index');
+    Route::post('/charges', [ChargeController::class, 'store'])->name('charges.store');
+    Route::get('/charges/export', [ChargeController::class, 'export'])->name('charges.export');
 
 });
 

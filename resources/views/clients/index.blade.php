@@ -197,6 +197,11 @@
             </div>
         </div>
 
+        <!-- Pagination -->
+        <div class="mt-6">
+            {{ $clients->links() }}
+        </div>
+
         <!-- Add Client Modal -->
         <div
             id="add-client-modal"
