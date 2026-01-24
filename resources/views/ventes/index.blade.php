@@ -37,6 +37,7 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Numéro de
                             Facture</th>
@@ -54,6 +55,9 @@
                             data-invoice-number="{{ strtolower($invoice->invoice_number) }}"
                             data-client-prenom="{{ strtolower($invoice->client->prenom ?? '') }}"
                             data-client-name="{{ strtolower($invoice->client->name ?? '') }}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ $invoice->creator->name ?? 'N/A' }}
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {{ $invoice->invoice_date->format('Y-m-d') }}
                             </td>
@@ -82,7 +86,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                            <td colspan="6" class="px-6 py-8 text-center text-gray-500">
                                 Aucune facture trouvée
                             </td>
                         </tr>
@@ -235,14 +239,14 @@
                     invoice.items.forEach(item => {
                         const subtotal = (item.unit_price * item.quantity) - item.discount;
                         const row = `
-                                    <tr>
-                                        <td class="px-3 py-2 text-sm text-gray-900">${item.product?.name || 'N/A'}</td>
-                                        <td class="px-3 py-2 text-sm text-center text-gray-900">${item.quantity}</td>
-                                        <td class="px-3 py-2 text-sm text-right text-gray-900">${parseFloat(item.unit_price).toFixed(2)} MAD</td>
-                                        <td class="px-3 py-2 text-sm text-right text-gray-900">${parseFloat(item.discount).toFixed(2)} MAD</td>
-                                        <td class="px-3 py-2 text-sm text-right font-medium text-gray-900">${subtotal.toFixed(2)} MAD</td>
-                                    </tr>
-                                `;
+                                            <tr>
+                                                <td class="px-3 py-2 text-sm text-gray-900">${item.product?.name || 'N/A'}</td>
+                                                <td class="px-3 py-2 text-sm text-center text-gray-900">${item.quantity}</td>
+                                                <td class="px-3 py-2 text-sm text-right text-gray-900">${parseFloat(item.unit_price).toFixed(2)} MAD</td>
+                                                <td class="px-3 py-2 text-sm text-right text-gray-900">${parseFloat(item.discount).toFixed(2)} MAD</td>
+                                                <td class="px-3 py-2 text-sm text-right font-medium text-gray-900">${subtotal.toFixed(2)} MAD</td>
+                                            </tr>
+                                        `;
                         itemsBody.innerHTML += row;
                     });
 

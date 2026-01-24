@@ -28,6 +28,7 @@
                             <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Type</th>
                             <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Produit</th>
                             <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Quantité</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">User</th>
                             <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Date</th>
                             <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Motif</th>
                         </tr>
@@ -53,6 +54,9 @@
                                     {{ $movement->quantity }}
                                 </td>
                                 <td class="px-6 py-4 text-gray-700">
+                                    {{ $movement->user->name ?? 'N/A' }}
+                                </td>
+                                <td class="px-6 py-4 text-gray-700">
                                     <div>{{ $movement->created_at->format('Y-m-d') }}</div>
                                     <div class="text-sm text-gray-500">{{ $movement->created_at->format('H:i') }}</div>
                                 </td>
@@ -62,7 +66,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-10 text-center text-gray-600">
+                                <td colspan="6" class="px-6 py-10 text-center text-gray-600">
                                     No stock movements found.
                                 </td>
                             </tr>
