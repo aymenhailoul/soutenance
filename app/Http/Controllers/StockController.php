@@ -15,7 +15,7 @@ class StockController extends Controller
     public function index(): View
     {
         return view('stock.index', [
-            'products' => Product::query()->orderBy('name')->get(),
+            'products' => Product::query()->where('type', 'Product')->orderBy('name')->get(),
         ]);
     }
 
@@ -24,6 +24,7 @@ class StockController extends Controller
         $search = $request->get('search', '');
 
         $products = Product::query()
+            ->where('type', 'Product')
             ->where('name', 'like', "%{$search}%")
             ->orderBy('name')
             ->limit(20)
