@@ -29,10 +29,10 @@ class ChargesExport implements FromCollection, WithHeadings
             ->where('movement', 'Entrée')
             ->where(function ($q) {
                 $q->whereNull('comment')
-                  ->orWhere('comment', 'not like', '%Annulation%');
+                    ->orWhere('comment', 'not like', '%Annulation%');
             })
             ->whereHas('product', function ($q) {
-                $q->where('type', 'Product');
+                $q->where('type', 'Produit');
             })
             ->whereBetween('created_at', [$dateFromParsed, $dateToParsed])
             ->get()

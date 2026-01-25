@@ -74,7 +74,7 @@
                 <!-- Comment -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-900 mb-2" for="comment">
-                        Motif
+                        Motif <span id="motif-required" class="text-red-600 hidden">*</span>
                     </label>
                     <textarea id="comment" name="comment" rows="3" placeholder="Motif de mouvement"
                         class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -142,6 +142,14 @@
 
             const fields = ['product-search', 'quantity', 'comment'];
             const approveBtn = document.getElementById('approve-btn');
+
+            // Toggle Required Asterisk
+            const motifRequired = document.getElementById('motif-required');
+            if (movement === 'Sortie') {
+                motifRequired.classList.remove('hidden');
+            } else {
+                motifRequired.classList.add('hidden');
+            }
 
             fields.forEach(fieldId => {
                 const field = document.getElementById(fieldId);
@@ -227,9 +235,16 @@
             const movement = document.getElementById('movement').value;
             const productId = document.getElementById('product_id').value;
             const quantity = document.getElementById('quantity').value;
+            const comment = document.getElementById('comment').value;
 
             if (!movement || !productId || !quantity || parseInt(quantity) < 1) {
                 alert('Please fill in all required fields.');
+                return;
+            }
+
+            // Require comment for Sortie
+            if (movement === 'Sortie' && !comment.trim()) {
+                alert('The motif (comment) field is required for stock exits.');
                 return;
             }
 

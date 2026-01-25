@@ -24,7 +24,7 @@ class StockController extends Controller
         $search = $request->get('search', '');
 
         $products = Product::query()
-            ->where('type', 'Product')
+            ->where('type', 'Produit')
             ->where('name', 'like', "%{$search}%")
             ->orderBy('name')
             ->limit(20)
@@ -41,6 +41,11 @@ class StockController extends Controller
             'quantity' => ['required', 'integer', 'min:1'],
             'comment' => ['nullable', 'string', 'max:500'],
         ]);
+
+        // Require comment for Sortie
+        if ($request->input('movement') === 'Sortie' && empty($request->input('comment'))) {
+            return back()->withErrors(['comment' => 'The motif field is required for stock exits.']);
+        }
 
         // Pre-check stock availability for Sortie operations
         if ($validated['movement'] === 'Sortie') {
