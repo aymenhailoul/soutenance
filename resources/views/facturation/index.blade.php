@@ -119,25 +119,46 @@
                 <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">Client</h3>
                     <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Sélectionner un client</label>
-                            <select x-model="selectedClientId" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
-                                <option value="">Choisir...</option>
-                                @foreach($clients as $client)
-                                    <option value="{{ $client->id }}">{{ $client->name }} {{ $client->prenom }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        
-                        <!-- Selected Client Details (Optional enhancement) -->
-                        <template x-if="selectedClientId">
-                            <div class="pt-4 border-t border-gray-100 text-sm">
-                                <div class="flex justify-between py-1">
-                                    <span class="text-gray-500">ID:</span>
-                                    <span class="font-medium" x-text="selectedClientId"></span>
+                        <div class="relative">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Rechercher un client</label>
+                            <input 
+                                type="text" 
+                                x-model="clientSearchQuery" 
+                                @input.debounce.300ms="searchClients()"
+                                @focus="if(clientSearchQuery.length >= 2) searchClients()"
+                                placeholder="Rechercher par nom..." 
+                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                x-show="!selectedClient"
+                            >
+                            
+                            <!-- Selected Client Display -->
+                            <div x-show="selectedClient" class="flex items-center justify-between w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2">
+                                <div>
+                                    <span class="font-medium text-gray-900" x-text="selectedClient ? selectedClient.name + ' ' + selectedClient.prenom : ''"></span>
+                                    <span class="text-sm text-gray-500 ml-2" x-text="selectedClient ? selectedClient.phone : ''"></span>
                                 </div>
+                                <button type="button" @click="clearClient()" class="text-red-500 hover:text-red-700">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
                             </div>
-                        </template>
+                            
+                            <!-- Client Search Results Dropdown -->
+                            <div x-show="clientResults.length > 0 && !selectedClient" 
+                                class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto" 
+                                @click.away="clientResults = []">
+                                <template x-for="client in clientResults" :key="client.id">
+                                    <div 
+                                        @click="selectClient(client)"
+                                        class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0"
+                                    >
+                                        <div class="font-medium text-gray-900" x-text="client.name + ' ' + client.prenom"></div>
+                                        <div class="text-xs text-gray-500" x-text="client.phone"></div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -168,7 +189,7 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span x-text="loading ? 'Traitement...' : 'Valider la Facture'"></span>
+                        <span x-text="loading ? 'Traitement...' : 'Créer la Facture'"></span>
                     </button>
                     <p x-show="errorMessage" class="mt-2 text-sm text-red-600 text-center" x-text="errorMessage"></p>
                 </div>
@@ -183,6 +204,9 @@
                 searchResults: [],
                 items: [],
                 selectedClientId: '',
+                selectedClient: null,
+                clientSearchQuery: '',
+                clientResults: [],
                 loading: false,
                 errorMessage: '',
 
@@ -197,6 +221,33 @@
                         .then(data => {
                             this.searchResults = data;
                         });
+                },
+
+                searchClients() {
+                    if (this.clientSearchQuery.length < 2) {
+                        this.clientResults = [];
+                        return;
+                    }
+                    
+                    fetch(`{{ route('facturation.search-clients') }}?q=${this.clientSearchQuery}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            this.clientResults = data;
+                        });
+                },
+
+                selectClient(client) {
+                    this.selectedClient = client;
+                    this.selectedClientId = client.id;
+                    this.clientSearchQuery = '';
+                    this.clientResults = [];
+                },
+
+                clearClient() {
+                    this.selectedClient = null;
+                    this.selectedClientId = '';
+                    this.clientSearchQuery = '';
+                    this.clientResults = [];
                 },
 
                 addItem(product) {
@@ -246,7 +297,6 @@
                     this.loading = true;
                     this.errorMessage = '';
 
-                    // First create draft
                     fetch('{{ route("facturation.store") }}', {
                         method: 'POST',
                         headers: {
@@ -262,27 +312,12 @@
                     .then(res => res.json())
                     .then(data => {
                         if (data.success) {
-                            // Then validate
-                            return fetch(`/facturation/${data.invoice_id}/validate`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                                }
-                            });
-                        } else {
-                            throw new Error(data.message);
-                        }
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.success) {
                             // Download PDF
                             window.location.href = data.pdf_url;
                             // Reset form
                             this.items = [];
                             this.selectedClientId = '';
-                            alert('Facture validée avec succès !');
+                            alert('Facture créée avec succès !');
                         } else {
                             throw new Error(data.message);
                         }

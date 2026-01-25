@@ -14,7 +14,7 @@ class VenteController extends Controller
     {
         $invoices = Invoice::with(['client', 'items.product', 'creator'])
             ->orderBy('invoice_date', 'desc')
-            ->get();
+            ->paginate(10);
 
         return view('ventes.index', [
             'invoices' => $invoices,

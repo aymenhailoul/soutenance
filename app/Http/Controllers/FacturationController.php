@@ -37,6 +37,17 @@ class FacturationController extends Controller
         return response()->json($products);
     }
 
+    public function searchClients(Request $request)
+    {
+        $query = $request->get('q');
+        $clients = Client::where('name', 'like', "%{$query}%")
+            ->orWhere('prenom', 'like', "%{$query}%")
+            ->take(20)
+            ->get();
+
+        return response()->json($clients);
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -51,6 +62,16 @@ class FacturationController extends Controller
 
         DB::beginTransaction();
         try {
+            // Check stock availability first
+            foreach ($validated['items'] as $item) {
+                $product = Product::find($item['product_id']);
+                if ($product->type === 'Product') {
+                    if ($product->stock < $item['quantity']) {
+                        throw new \Exception("Stock insuffisant pour le produit: {$product->name}");
+                    }
+                }
+            }
+
             $totalAmount = 0;
             foreach ($validated['items'] as $item) {
                 $discount = $item['discount'] ?? 0;
@@ -62,7 +83,7 @@ class FacturationController extends Controller
                 'client_id' => $validated['client_id'],
                 'invoice_date' => $validated['invoice_date'],
                 'total_amount' => $totalAmount,
-                'status' => 'Draft',
+                'status' => 'Finalized',
                 'created_by' => auth()->user()->id,
             ]);
 
@@ -74,22 +95,34 @@ class FacturationController extends Controller
                     'unit_price' => $item['unit_price'],
                     'discount' => $item['discount'] ?? 0,
                 ]);
+
+                // Deduct stock for physical products
+                $product = Product::find($item['product_id']);
+                if ($product->type === 'Product') {
+                    StockMovement::create([
+                        'product_id' => $item['product_id'],
+                        'movement' => 'Sortie',
+                        'quantity' => $item['quantity'],
+                        'user_id' => auth()->user()->id,
+                        'comment' => "Facture #{$invoice->invoice_number}",
+                    ]);
+                }
             }
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Invoice saved successfully',
+                'message' => 'Facture créée avec succès',
                 'invoice_id' => $invoice->id,
-                'redirect' => route('facturation.pdf', $invoice->id)
+                'pdf_url' => route('facturation.pdf', $invoice->id)
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Invoice creation failed: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Error creating invoice: ' . $e->getMessage()
+                'message' => $e->getMessage()
             ], 500);
         }
     }
@@ -149,5 +182,48 @@ class FacturationController extends Controller
         
         return $pdf->download("Invoice_{$invoice->invoice_number}.pdf");
         // Or ->stream() if you prefer to open in browser first
+    }
+
+    public function cancel(Invoice $invoice)
+    {
+        if ($invoice->status !== 'Finalized') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Seules les factures finalisées peuvent être annulées'
+            ], 400);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Restore stock for each item
+            foreach ($invoice->items as $item) {
+                if ($item->product->type === 'Product') {
+                    StockMovement::create([
+                        'product_id' => $item->product_id,
+                        'movement' => 'Entrée',
+                        'quantity' => $item->quantity,
+                        'user_id' => auth()->user()->id,
+                        'comment' => "Annulation Facture #{$invoice->invoice_number}",
+                    ]);
+                }
+            }
+
+            $invoice->update(['status' => 'Cancelled']);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Facture annulée avec succès. Le stock a été restauré.'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Invoice cancellation failed: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de l\'annulation: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

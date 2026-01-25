@@ -45,6 +45,8 @@
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total
                         </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut
+                        </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action
                         </th>
                     </tr>
@@ -71,6 +73,21 @@
                                 {{ number_format($invoice->total_amount, 2, '.', '') }} MAD
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                @if($invoice->status === 'Finalized')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Finalisée
+                                    </span>
+                                @elseif($invoice->status === 'Draft')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        Brouillon
+                                    </span>
+                                @elseif($invoice->status === 'Cancelled')
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        Annulée
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <button onclick="showInvoiceDetails({{ $invoice->id }})"
                                     class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -93,6 +110,11 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-6">
+            {{ $invoices->links() }}
         </div>
 
         <!-- No Results Message -->
@@ -131,6 +153,10 @@
                         <span class="text-sm font-medium text-gray-600">Client:</span>
                         <span class="text-sm text-gray-900" id="modal-client-name"></span>
                     </div>
+                    <div class="flex justify-between">
+                        <span class="text-sm font-medium text-gray-600">Statut:</span>
+                        <span class="text-sm" id="modal-status"></span>
+                    </div>
                 </div>
 
                 <!-- Items Table -->
@@ -164,6 +190,10 @@
                     <button onclick="closeInvoiceModal()"
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
                         Exit
+                    </button>
+                    <button id="cancel-invoice-btn"
+                        class="hidden px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
+                        Annuler Facture
                     </button>
                     <button id="download-pdf-btn"
                         class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
@@ -253,10 +283,29 @@
                     // Set total
                     document.getElementById('modal-total').textContent = `${parseFloat(invoice.total_amount).toFixed(2)} MAD`;
 
+                    // Set status badge
+                    const statusEl = document.getElementById('modal-status');
+                    if (invoice.status === 'Finalized') {
+                        statusEl.innerHTML = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Finalisée</span>';
+                    } else if (invoice.status === 'Draft') {
+                        statusEl.innerHTML = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Brouillon</span>';
+                    } else if (invoice.status === 'Cancelled') {
+                        statusEl.innerHTML = '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Annulée</span>';
+                    }
+
                     // Set PDF download link
                     document.getElementById('download-pdf-btn').onclick = () => {
                         window.location.href = `/facturation/${invoice.id}/pdf`;
                     };
+
+                    // Show/hide cancel button based on status
+                    const cancelBtn = document.getElementById('cancel-invoice-btn');
+                    if (invoice.status === 'Finalized') {
+                        cancelBtn.classList.remove('hidden');
+                        cancelBtn.onclick = () => cancelInvoice(invoice.id);
+                    } else {
+                        cancelBtn.classList.add('hidden');
+                    }
 
                     // Show modal
                     document.getElementById('invoice-modal').classList.remove('hidden');
@@ -283,5 +332,33 @@
                 closeInvoiceModal();
             }
         });
+
+        // Cancel invoice function
+        function cancelInvoice(invoiceId) {
+            if (!confirm('Êtes-vous sûr de vouloir annuler cette facture? Le stock sera restauré.')) {
+                return;
+            }
+
+            fetch(`/facturation/${invoiceId}/cancel`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert('Erreur: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error cancelling invoice:', error);
+                alert('Erreur lors de l\'annulation de la facture');
+            });
+        }
     </script>
 @endsection
