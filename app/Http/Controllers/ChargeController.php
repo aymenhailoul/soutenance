@@ -20,9 +20,13 @@ class ChargeController extends Controller
         $dateFromParsed = $dateFrom ? Carbon::parse($dateFrom)->startOfDay() : null;
         $dateToParsed = $dateTo ? Carbon::parse($dateTo)->endOfDay() : null;
 
-        // Get stock entrées with calculated amount
+        // Get stock entrées with calculated amount (exclude those from cancelled invoices)
         $entreesQuery = StockMovement::with('product')
             ->where('movement', 'Entrée')
+            ->where(function ($q) {
+                $q->whereNull('comment')
+                  ->orWhere('comment', 'not like', '%Annulation%');
+            })
             ->whereHas('product', function ($q) {
                 $q->where('type', 'Product');
             });
