@@ -24,9 +24,13 @@ class ChargesExport implements FromCollection, WithHeadings
         $dateFromParsed = Carbon::parse($this->dateFrom)->startOfDay();
         $dateToParsed = Carbon::parse($this->dateTo)->endOfDay();
 
-        // Get stock entrées
+        // Get stock entrées (exclude those from cancelled invoices)
         $entrees = StockMovement::with('product')
             ->where('movement', 'Entrée')
+            ->where(function ($q) {
+                $q->whereNull('comment')
+                  ->orWhere('comment', 'not like', '%Annulation%');
+            })
             ->whereHas('product', function ($q) {
                 $q->where('type', 'Product');
             })
