@@ -15,13 +15,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create a default super admin user if none exist
-        User::firstOrCreate(
-            ['name' => 'admin'],
-            [
-                'password' => 'admin123', // will be hashed automatically by the model cast
-                'role' => 'Super User',
-            ]
-        );
+        $this->call([
+            PagesSeeder::class,
+            AdminUserSeeder::class,
+        ]);
     }
 }

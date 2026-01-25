@@ -11,7 +11,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\FacturationController;
 use App\Http\Controllers\VenteController;
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'page.permission'])->group(function () {
     Route::get('/', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/_debug/auth', function () {
@@ -23,13 +23,17 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('debug.auth');
 
-    Route::middleware(['admin'])->group(function () {
-        Route::get('/users', [UserController::class, 'index'])->name('users.index');
-        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
-        Route::post('/users', [UserController::class, 'store'])->name('users.store');
-        Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
-        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-    });
+    // User management routes
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+    // Page management routes
+    Route::post('/pages', [UserController::class, 'storePage'])->name('pages.store');
+    Route::put('/pages/{page}', [UserController::class, 'updatePage'])->name('pages.update');
+    Route::delete('/pages/{page}', [UserController::class, 'destroyPage'])->name('pages.destroy');
 
     Route::get('/clients', [ClientController::class, 'index'])->name('clients.index');
     Route::post('/clients', [ClientController::class, 'store'])->name('clients.store');
@@ -80,6 +84,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/charges', [ChargeController::class, 'index'])->name('charges.index');
     Route::post('/charges', [ChargeController::class, 'store'])->name('charges.store');
     Route::get('/charges/export', [ChargeController::class, 'export'])->name('charges.export');
+
+    // Test route
+    Route::get('/meeting', function () {
+        return view('meeting');
+    })->name('meeting.index');
+
 
 });
 
