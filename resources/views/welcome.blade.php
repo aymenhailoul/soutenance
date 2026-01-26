@@ -30,7 +30,7 @@
             </div>
 
             <!-- Total Sales -->
-            @if(in_array(auth()->user()->role, ['Admin', 'Super User']))
+            @if(auth()->user()->hasPageAccess('dashboard.total_sales'))
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="flex items-start gap-4">
                         <div class="w-14 h-14 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">

@@ -17,7 +17,7 @@ class ProductSeeder extends Seeder
             ['serial_code' => 'PRD-001'],
             [
                 'name' => 'Laptop Dell',
-                'type' => 'Product',
+                'type' => 'Produit',
                 'prix_achat' => 6500.00,
                 'prix_vente' => 7800.00,
             ]
@@ -37,7 +37,7 @@ class ProductSeeder extends Seeder
             ['serial_code' => 'PRD-002'],
             [
                 'name' => 'Wireless Mouse',
-                'type' => 'Product',
+                'type' => 'Produit',
                 'prix_achat' => 80.00,
                 'prix_vente' => 150.00,
             ]

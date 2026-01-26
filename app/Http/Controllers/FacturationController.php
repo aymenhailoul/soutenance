@@ -65,7 +65,7 @@ class FacturationController extends Controller
             // Check stock availability first
             foreach ($validated['items'] as $item) {
                 $product = Product::find($item['product_id']);
-                if ($product->type === 'Product') {
+                if ($product->type === 'Produit') {
                     if ($product->stock < $item['quantity']) {
                         throw new \Exception("Stock insuffisant pour le produit: {$product->name}");
                     }
@@ -98,7 +98,7 @@ class FacturationController extends Controller
 
                 // Deduct stock for physical products
                 $product = Product::find($item['product_id']);
-                if ($product->type === 'Product') {
+                if ($product->type === 'Produit') {
                     StockMovement::create([
                         'product_id' => $item['product_id'],
                         'movement' => 'Sortie',
@@ -138,7 +138,7 @@ class FacturationController extends Controller
             // Check stock availability first
             foreach ($invoice->items as $item) {
                 $product = $item->product;
-                if ($product->type === 'Product') { // Only check stock for physical products
+                if ($item->product->type === 'Produit') { // Only check stock for physical products
                     if ($product->stock < $item->quantity) {
                         throw new \Exception("Insufficient stock for product: {$product->name}");
                     }
@@ -147,7 +147,7 @@ class FacturationController extends Controller
 
             // Deduct stock
             foreach ($invoice->items as $item) {
-                if ($item->product->type === 'Product') {
+                if ($item->product->type === 'Produit') {
                     StockMovement::create([
                         'product_id' => $item->product_id,
                         'movement' => 'Sortie',
@@ -177,9 +177,9 @@ class FacturationController extends Controller
     public function downloadPdf(Invoice $invoice)
     {
         $invoice->load(['client', 'items.product', 'creator']);
-        
+
         $pdf = Pdf::loadView('facturation.pdf', compact('invoice'));
-        
+
         return $pdf->download("Invoice_{$invoice->invoice_number}.pdf");
         // Or ->stream() if you prefer to open in browser first
     }
@@ -197,7 +197,7 @@ class FacturationController extends Controller
         try {
             // Restore stock for each item
             foreach ($invoice->items as $item) {
-                if ($item->product->type === 'Product') {
+                if ($item->product->type === 'Produit') {
                     StockMovement::create([
                         'product_id' => $item->product_id,
                         'movement' => 'Entrée',

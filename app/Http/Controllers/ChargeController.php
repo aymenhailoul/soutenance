@@ -25,10 +25,10 @@ class ChargeController extends Controller
             ->where('movement', 'Entrée')
             ->where(function ($q) {
                 $q->whereNull('comment')
-                  ->orWhere('comment', 'not like', '%Annulation%');
+                    ->orWhere('comment', 'not like', '%Annulation%');
             })
             ->whereHas('product', function ($q) {
-                $q->where('type', 'Product');
+                $q->where('type', 'Produit');
             });
 
         if ($dateFromParsed && $dateToParsed) {

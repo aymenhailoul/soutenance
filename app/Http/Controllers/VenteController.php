@@ -12,7 +12,7 @@ class VenteController extends Controller
 {
     public function index(): View
     {
-        $invoices = Invoice::with(['client', 'items.product'])
+        $invoices = Invoice::with(['client', 'items.product', 'creator'])
             ->orderBy('invoice_date', 'desc')
             ->paginate(10);
 

@@ -53,11 +53,11 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'        => 'required|string|max:255',
-            'type'        => 'required|in:Product,Service',
-            'prix_achat'  => 'nullable|required_if:type,Product|regex:/^\d+(\.\d{1,2})?$/',
-            'prix_vente'  => 'required|regex:/^\d+(\.\d{1,2})?$/',
-            'serial_code' => 'nullable|required_if:type,Product|integer|unique:products,serial_code',
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:Produit,Service',
+            'prix_achat' => 'nullable|required_if:type,Produit|regex:/^\d+(\.\d{1,2})?$/',
+            'prix_vente' => 'required|regex:/^\d+(\.\d{1,2})?$/',
+            'serial_code' => 'nullable|required_if:type,Produit|integer|unique:products,serial_code',
         ]);
 
         Product::create($data);
@@ -77,11 +77,11 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $data = $request->validate([
-            'name'        => 'required|string|max:255',
-            'type'        => 'required|in:Product,Service',
-            'prix_achat'  => 'nullable|required_if:type,Product|regex:/^\d+(\.\d{1,2})?$/',
-            'prix_vente'  => 'required|regex:/^\d+(\.\d{1,2})?$/',
-            'serial_code' => 'nullable|required_if:type,Product|integer|unique:products,serial_code,' . $product->id,
+            'name' => 'required|string|max:255',
+            'type' => 'required|in:Produit,Service',
+            'prix_achat' => 'nullable|required_if:type,Produit|regex:/^\d+(\.\d{1,2})?$/',
+            'prix_vente' => 'required|regex:/^\d+(\.\d{1,2})?$/',
+            'serial_code' => 'nullable|required_if:type,Produit|integer|unique:products,serial_code,' . $product->id,
         ]);
 
         // If Service → force NULL values
