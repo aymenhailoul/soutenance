@@ -95,14 +95,14 @@
     <div id="approval-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/30">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
             <div class="p-6">
-                <h2 class="text-lg font-semibold text-gray-900 mb-4">Confirm Stock Movement</h2>
-                <p class="text-gray-600 mb-6">Are you sure you want to proceed with this stock movement?</p>
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Confirmer le mouvement de stock</h2>
+                <p class="text-gray-600 mb-6">Êtes-vous sûr de vouloir effectuer ce mouvement de stock ?</p>
                 <div class="flex justify-end gap-3">
                     <x-button variant="secondary" type="button" onclick="hideApprovalModal()">
-                        No
+                        Non
                     </x-button>
                     <x-button variant="primary" type="button" onclick="submitForm()">
-                        Yes
+                        Oui
                     </x-button>
                 </div>
             </div>
@@ -135,6 +135,8 @@
     <script>
         let products = @json($products);
         let searchTimeout;
+        let highlightedIndex = -1;
+        let currentFilteredProducts = [];
 
         function toggleFormFields() {
             const movement = document.getElementById('movement').value;
@@ -175,6 +177,7 @@
 
         function searchProducts(query) {
             clearTimeout(searchTimeout);
+            highlightedIndex = -1;
 
             if (query.length < 1) {
                 hideProductDropdown();
@@ -186,6 +189,7 @@
                     p.name.toLowerCase().startsWith(query.toLowerCase())
                 );
 
+                currentFilteredProducts = filtered;
                 displayProducts(filtered);
             }, 100);
         }
@@ -193,6 +197,7 @@
         function displayProducts(filteredProducts) {
             const dropdown = document.getElementById('product-dropdown');
             dropdown.innerHTML = '';
+            currentFilteredProducts = filteredProducts;
 
             if (filteredProducts.length === 0) {
                 dropdown.innerHTML = '<div class="px-4 py-2 text-gray-500">No products found</div>';
@@ -200,15 +205,60 @@
                 return;
             }
 
-            filteredProducts.forEach(product => {
+            filteredProducts.forEach((product, index) => {
                 const item = document.createElement('div');
-                item.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer';
+                item.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer dropdown-item';
+                if (index === highlightedIndex) {
+                    item.classList.add('bg-blue-100');
+                }
+                item.dataset.index = index;
                 item.textContent = product.name;
                 item.onclick = () => selectProduct(product.id, product.name);
                 dropdown.appendChild(item);
             });
 
             dropdown.classList.remove('hidden');
+        }
+
+        function updateHighlight() {
+            const dropdown = document.getElementById('product-dropdown');
+            const items = dropdown.querySelectorAll('.dropdown-item');
+            items.forEach((item, index) => {
+                if (index === highlightedIndex) {
+                    item.classList.add('bg-blue-100');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('bg-blue-100');
+                }
+            });
+        }
+
+        function handleKeydown(event) {
+            const dropdown = document.getElementById('product-dropdown');
+            if (dropdown.classList.contains('hidden')) return;
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                if (highlightedIndex < currentFilteredProducts.length - 1) {
+                    highlightedIndex++;
+                    updateHighlight();
+                }
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (highlightedIndex > 0) {
+                    highlightedIndex--;
+                    updateHighlight();
+                }
+            } else if (event.key === 'Enter') {
+                event.preventDefault();
+                if (highlightedIndex >= 0 && highlightedIndex < currentFilteredProducts.length) {
+                    const product = currentFilteredProducts[highlightedIndex];
+                    selectProduct(product.id, product.name);
+                }
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                hideProductDropdown();
+            }
         }
 
         function selectProduct(productId, productName) {
@@ -218,6 +268,7 @@
         }
 
         function showProductDropdown() {
+            highlightedIndex = -1;
             const query = document.getElementById('product-search').value;
             if (query.length > 0) {
                 searchProducts(query);
@@ -228,7 +279,11 @@
 
         function hideProductDropdown() {
             document.getElementById('product-dropdown').classList.add('hidden');
+            highlightedIndex = -1;
         }
+
+        // Attach keyboard listener
+        document.getElementById('product-search').addEventListener('keydown', handleKeydown);
 
         function showApprovalModal() {
             // Validate form first
@@ -244,7 +299,7 @@
 
             // Require comment for Sortie
             if (movement === 'Sortie' && !comment.trim()) {
-                alert('The motif (comment) field is required for stock exits.');
+                alert('Le motif est requis pour les sorties.');
                 return;
             }
 

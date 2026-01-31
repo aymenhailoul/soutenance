@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\CreditNoteItem;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Product;
@@ -195,16 +196,25 @@ class FacturationController extends Controller
 
         DB::beginTransaction();
         try {
-            // Restore stock for each item
+            // Restore stock for each item, accounting for already returned quantities
             foreach ($invoice->items as $item) {
                 if ($item->product->type === 'Produit') {
-                    StockMovement::create([
-                        'product_id' => $item->product_id,
-                        'movement' => 'Entrée',
-                        'quantity' => $item->quantity,
-                        'user_id' => auth()->user()->id,
-                        'comment' => "Annulation Facture #{$invoice->invoice_number}",
-                    ]);
+                    // Calculate quantity already returned via credit notes
+                    $alreadyReturned = CreditNoteItem::where('invoice_item_id', $item->id)
+                        ->sum('quantity');
+                    
+                    // Only restore the quantity that wasn't already returned
+                    $quantityToRestore = $item->quantity - $alreadyReturned;
+                    
+                    if ($quantityToRestore > 0) {
+                        StockMovement::create([
+                            'product_id' => $item->product_id,
+                            'movement' => 'Entrée',
+                            'quantity' => $quantityToRestore,
+                            'user_id' => auth()->user()->id,
+                            'comment' => "Annulation Facture #{$invoice->invoice_number}",
+                        ]);
+                    }
                 }
             }
 

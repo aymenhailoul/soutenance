@@ -30,20 +30,22 @@ class Invoice extends Model
 
         static::creating(function ($invoice) {
             if (!$invoice->invoice_number) {
-                // Generate unique invoice number: INV-YYYYMMDD-XXXX
+                // Generate unique invoice number: INV-YYYYMMDD-XXXXXX
                 $prefix = 'INV-' . date('Ymd') . '-';
-                $latest = self::where('invoice_number', 'like', $prefix . '%')
-                    ->orderBy('invoice_number', 'desc')
-                    ->first();
+                
+                // Find the maximum numeric suffix for today's invoices
+                $maxNumber = self::where('invoice_number', 'like', $prefix . '%')
+                    ->get()
+                    ->map(function ($inv) {
+                        $parts = explode('-', $inv->invoice_number);
+                        return intval(end($parts));
+                    })
+                    ->max() ?? 0;
 
-                if ($latest) {
-                    $lastNumber = intval(substr($latest->invoice_number, -4));
-                    $newNumber = $lastNumber + 1;
-                } else {
-                    $newNumber = 1;
-                }
+                $newNumber = $maxNumber + 1;
 
-                $invoice->invoice_number = $prefix . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+                // Use minimum 6 digits, but allow more if needed
+                $invoice->invoice_number = $prefix . str_pad($newNumber, 6, '0', STR_PAD_LEFT);
             }
         });
     }
@@ -61,5 +63,10 @@ class Invoice extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function creditNotes()
+    {
+        return $this->hasMany(CreditNote::class);
     }
 }

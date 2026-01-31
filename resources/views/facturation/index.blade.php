@@ -26,6 +26,10 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Ajouter un produit ou service</label>
                     <div class="relative">
                         <input type="text" x-model="searchQuery" @input.debounce.300ms="searchProducts()"
+                            @keydown.arrow-down.prevent="navigateProductDown()"
+                            @keydown.arrow-up.prevent="navigateProductUp()"
+                            @keydown.enter.prevent="selectHighlightedProduct()"
+                            @keydown.escape.prevent="searchResults = []; productHighlightIndex = -1"
                             placeholder="Rechercher par nom ou code..."
                             class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pl-10">
 
@@ -33,16 +37,21 @@
                         <!-- Search Results Dropdown -->
                         <div x-show="searchResults.length > 0"
                             class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto"
-                            @click.away="searchResults = []">
-                            <template x-for="product in searchResults" :key="product.id">
+                            @click.away="searchResults = []; productHighlightIndex = -1">
+                            <template x-for="(product, pIndex) in searchResults" :key="product.id">
                                 <div @click="addItem(product)"
-                                    class="px-4 py-3 hover:bg-gray-50 cursor-pointer flex justify-between items-center border-b border-gray-100 last:border-0">
+                                    class="px-4 py-3 hover:bg-gray-50 cursor-pointer flex justify-between items-center border-b border-gray-100 last:border-0"
+                                    :class="{ 'bg-blue-100': pIndex === productHighlightIndex }">
                                     <div>
                                         <div class="font-medium text-gray-900" x-text="product.name"></div>
                                         <div class="text-xs text-gray-500">
-                                            <span x-text="product.type"></span> |
-                                            Stock: <span :class="product.stock > 0 ? 'text-green-600' : 'text-red-600'"
-                                                x-text="product.stock"></span>
+                                            <span x-text="product.type"></span>
+                                            <template x-if="product.type !== 'Service'">
+                                                <span>
+                                                    | Stock: <span :class="product.stock > 0 ? 'text-green-600' : 'text-red-600'"
+                                                        x-text="product.stock"></span>
+                                                </span>
+                                            </template>
                                         </div>
                                     </div>
                                     <div class="text-sm font-semibold text-gray-900"
@@ -138,6 +147,10 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Rechercher un client</label>
                             <input type="text" x-model="clientSearchQuery" @input.debounce.300ms="searchClients()"
                                 @focus="if(clientSearchQuery.length >= 2) searchClients()"
+                                @keydown.arrow-down.prevent="navigateClientDown()"
+                                @keydown.arrow-up.prevent="navigateClientUp()"
+                                @keydown.enter.prevent="selectHighlightedClient()"
+                                @keydown.escape.prevent="clientResults = []; clientHighlightIndex = -1"
                                 placeholder="Rechercher par nom..."
                                 class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                 x-show="!selectedClient">
@@ -162,10 +175,11 @@
                             <!-- Client Search Results Dropdown -->
                             <div x-show="clientResults.length > 0 && !selectedClient"
                                 class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto"
-                                @click.away="clientResults = []">
-                                <template x-for="client in clientResults" :key="client.id">
+                                @click.away="clientResults = []; clientHighlightIndex = -1">
+                                <template x-for="(client, cIndex) in clientResults" :key="client.id">
                                     <div @click="selectClient(client)"
-                                        class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0">
+                                        class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0"
+                                        :class="{ 'bg-blue-100': cIndex === clientHighlightIndex }">
                                         <div class="font-medium text-gray-900" x-text="client.name + ' ' + client.prenom">
                                         </div>
                                         <div class="text-xs text-gray-500" x-text="client.phone"></div>
@@ -217,15 +231,18 @@
             return {
                 searchQuery: '',
                 searchResults: [],
+                productHighlightIndex: -1,
                 items: [],
                 selectedClientId: '',
                 selectedClient: null,
                 clientSearchQuery: '',
                 clientResults: [],
+                clientHighlightIndex: -1,
                 loading: false,
                 errorMessage: '',
 
                 searchProducts() {
+                    this.productHighlightIndex = -1;
                     if (this.searchQuery.length < 2) {
                         this.searchResults = [];
                         return;
@@ -238,7 +255,26 @@
                         });
                 },
 
+                navigateProductDown() {
+                    if (this.searchResults.length > 0 && this.productHighlightIndex < this.searchResults.length - 1) {
+                        this.productHighlightIndex++;
+                    }
+                },
+
+                navigateProductUp() {
+                    if (this.productHighlightIndex > 0) {
+                        this.productHighlightIndex--;
+                    }
+                },
+
+                selectHighlightedProduct() {
+                    if (this.productHighlightIndex >= 0 && this.productHighlightIndex < this.searchResults.length) {
+                        this.addItem(this.searchResults[this.productHighlightIndex]);
+                    }
+                },
+
                 searchClients() {
+                    this.clientHighlightIndex = -1;
                     if (this.clientSearchQuery.length < 2) {
                         this.clientResults = [];
                         return;
@@ -251,11 +287,30 @@
                         });
                 },
 
+                navigateClientDown() {
+                    if (this.clientResults.length > 0 && this.clientHighlightIndex < this.clientResults.length - 1) {
+                        this.clientHighlightIndex++;
+                    }
+                },
+
+                navigateClientUp() {
+                    if (this.clientHighlightIndex > 0) {
+                        this.clientHighlightIndex--;
+                    }
+                },
+
+                selectHighlightedClient() {
+                    if (this.clientHighlightIndex >= 0 && this.clientHighlightIndex < this.clientResults.length) {
+                        this.selectClient(this.clientResults[this.clientHighlightIndex]);
+                    }
+                },
+
                 selectClient(client) {
                     this.selectedClient = client;
                     this.selectedClientId = client.id;
                     this.clientSearchQuery = '';
                     this.clientResults = [];
+                    this.clientHighlightIndex = -1;
                 },
 
                 clearClient() {
@@ -263,6 +318,7 @@
                     this.selectedClientId = '';
                     this.clientSearchQuery = '';
                     this.clientResults = [];
+                    this.clientHighlightIndex = -1;
                 },
 
                 addItem(product) {

@@ -14,7 +14,7 @@ class ProductSeeder extends Seeder
     public function run(): void
     {
         Product::firstOrCreate(
-            ['serial_code' => 'PRD-001'],
+            ['serial_code' => '001'],
             [
                 'name' => 'Laptop Dell',
                 'type' => 'Produit',
@@ -24,7 +24,7 @@ class ProductSeeder extends Seeder
         );
 
         Product::firstOrCreate(
-            ['serial_code' => 'SRV-001'],
+            ['serial_code' => '003'],
             [
                 'name' => 'Website Development',
                 'type' => 'Service',
@@ -34,7 +34,7 @@ class ProductSeeder extends Seeder
         );
 
         Product::firstOrCreate(
-            ['serial_code' => 'PRD-002'],
+            ['serial_code' => '002'],
             [
                 'name' => 'Wireless Mouse',
                 'type' => 'Produit',

@@ -82,6 +82,9 @@ class ProductController extends Controller
             'prix_achat' => 'nullable|required_if:type,Produit|regex:/^\d+(\.\d{1,2})?$/',
             'prix_vente' => 'required|regex:/^\d+(\.\d{1,2})?$/',
             'serial_code' => 'nullable|required_if:type,Produit|integer|unique:products,serial_code,' . $product->id,
+        ], [
+            'prix_achat.required_if' => 'veuillez renseigner ce champ',
+            'serial_code.required_if' => 'veuillez renseigner ce champ',
         ]);
 
         // If Service → force NULL values
@@ -94,7 +97,7 @@ class ProductController extends Controller
 
         return redirect()
             ->route('products.index')
-            ->with('success', 'Product updated successfully');
+            ->with('success', 'Produit modifié avec succès');
     }
 
     // DELETE PRODUCT
@@ -104,7 +107,7 @@ class ProductController extends Controller
 
         return redirect()
             ->route('products.index')
-            ->with('success', 'Product deleted successfully');
+            ->with('success', 'Produit supprimé avec succès');
     }
 
     // EXPORT PRODUCTS (xls)

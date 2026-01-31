@@ -26,15 +26,50 @@
 
         <!-- Clients List -->
         <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900">Liste des clients</h2>
-                <x-button
-                    variant="primary"
-                    type="button"
-                    onclick="document.getElementById('add-client-modal').classList.remove('hidden')"
-                >
-                    Ajouter un client
-                </x-button>
+            <div class="px-6 py-4 border-b border-gray-200 flex flex-col gap-4">
+                <div class="flex items-center justify-between gap-4">
+                    <h2 class="text-lg font-semibold text-gray-900">Liste des clients</h2>
+                    <x-button
+                        variant="primary"
+                        type="button"
+                        onclick="document.getElementById('add-client-modal').classList.remove('hidden')"
+                    >
+                        Ajouter un client
+                    </x-button>
+                </div>
+
+                <!-- Client Search Dropdown -->
+                <div class="flex items-center gap-3">
+                    <div class="relative flex-1 max-w-md">
+                        <label class="block text-sm font-semibold text-gray-900 mb-2" for="client-search">
+                            Rechercher client
+                        </label>
+                        <div class="relative">
+                            <input type="text" id="client-search" autocomplete="off"
+                                placeholder="Taper nom, prénom ou voiture"
+                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                value="{{ request('client_id') ? $allClients->firstWhere('id', request('client_id'))?->name . ' ' . $allClients->firstWhere('id', request('client_id'))?->prenom : '' }}"
+                                oninput="searchClients(this.value)" onfocus="showClientDropdown()"
+                                onblur="setTimeout(() => hideClientDropdown(), 200)" />
+                            <div id="client-dropdown"
+                                class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto capitalize">
+                                <!-- Clients will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                    @if(request('client_id'))
+                        <div class="mt-6">
+                            <a href="{{ route('clients.index') }}"
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Effacer filtre
+                            </a>
+                        </div>
+                    @endif
+                </div>
             </div>
 
             <div class="overflow-x-auto">
@@ -61,7 +96,7 @@
                                 <td class="px-6 py-4 text-gray-700">
                                     {{ $client->phone }}
                                 </td>
-                                <td class="px-6 py-4 text-gray-700">
+                                <td class="px-6 py-4 text-gray-700 uppercase">
                                     {{ $client->car_brand ?? '-' }}
                                 </td>
                                 <td class="px-6 py-4 text-gray-700">
@@ -162,10 +197,10 @@
                                                                 type="button"
                                                                 onclick="document.getElementById('edit-client-{{ $client->id }}').classList.add('hidden')"
                                                             >
-                                                                Cancel
+                                                                Annuler
                                                             </x-button>
                                                             <x-button variant="primary" type="submit">
-                                                                Update
+                                                                Modifier
                                                             </x-button>
                                                         </div>
                                                     </form>
@@ -261,6 +296,11 @@
                                     placeholder="Entrer numéro de téléphone"
                                     class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                     required
+                                    inputmode="numeric"
+    pattern="[0-9]{10}"
+    maxlength="10"
+    minlength="10"
+    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10)"
                                 />
                             </div>
 
@@ -302,4 +342,138 @@
             </div>
         </div>
     </div>
+
+<script>
+    // Client search dropdown functionality
+    let allClients = @json($allClients);
+    let searchTimeout;
+    let highlightedIndex = -1;
+    let currentFilteredClients = [];
+
+    function searchClients(query) {
+        clearTimeout(searchTimeout);
+        highlightedIndex = -1;
+
+        if (query.length < 1) {
+            hideClientDropdown();
+            return;
+        }
+
+        searchTimeout = setTimeout(() => {
+            const filtered = allClients.filter(c => {
+                const queryLower = query.toLowerCase();
+                const nameMatch = c.name.toLowerCase().startsWith(queryLower);
+                const prenomMatch = c.prenom && c.prenom.toLowerCase().startsWith(queryLower);
+                const carBrandMatch = c.car_brand && c.car_brand.toLowerCase().startsWith(queryLower);
+                const matriculeMatch = c.matricule && c.matricule.toLowerCase().startsWith(queryLower);
+                // Also check full name
+                const fullName = (c.name + ' ' + (c.prenom || '')).toLowerCase();
+                const fullNameMatch = fullName.startsWith(queryLower);
+                return nameMatch || prenomMatch || carBrandMatch || matriculeMatch || fullNameMatch;
+            });
+
+            currentFilteredClients = filtered;
+            displayClients(filtered);
+        }, 100);
+    }
+
+    function displayClients(filteredClients) {
+        const dropdown = document.getElementById('client-dropdown');
+        dropdown.innerHTML = '';
+        currentFilteredClients = filteredClients;
+
+        if (filteredClients.length === 0) {
+            dropdown.innerHTML = '<div class="px-4 py-2 text-gray-500">Aucun client trouvé</div>';
+            dropdown.classList.remove('hidden');
+            return;
+        }
+
+        filteredClients.forEach((client, index) => {
+            const item = document.createElement('div');
+            item.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer dropdown-item';
+            if (index === highlightedIndex) {
+                item.classList.add('bg-blue-100');
+            }
+            item.dataset.index = index;
+            // Show name, prénom and car info if available
+            let display = `${client.name} ${client.prenom || ''}`;
+            if (client.car_brand || client.matricule) {
+                display += ' ' + `  -  ${client.car_brand || ''} - ${client.matricule || ''}`.trim();
+            }
+            item.textContent = display;
+            item.onclick = () => selectClient(client.id, client.name, client.prenom);
+            dropdown.appendChild(item);
+        });
+
+        dropdown.classList.remove('hidden');
+    }
+
+    function updateHighlight() {
+        const dropdown = document.getElementById('client-dropdown');
+        const items = dropdown.querySelectorAll('.dropdown-item');
+        items.forEach((item, index) => {
+            if (index === highlightedIndex) {
+                item.classList.add('bg-blue-100');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('bg-blue-100');
+            }
+        });
+    }
+
+    function handleKeydown(event) {
+        const dropdown = document.getElementById('client-dropdown');
+        if (dropdown.classList.contains('hidden')) return;
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            if (highlightedIndex < currentFilteredClients.length - 1) {
+                highlightedIndex++;
+                updateHighlight();
+            }
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            if (highlightedIndex > 0) {
+                highlightedIndex--;
+                updateHighlight();
+            }
+        } else if (event.key === 'Enter') {
+            event.preventDefault();
+            if (highlightedIndex >= 0 && highlightedIndex < currentFilteredClients.length) {
+                const client = currentFilteredClients[highlightedIndex];
+                selectClient(client.id, client.name, client.prenom);
+            }
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            hideClientDropdown();
+        }
+    }
+
+    function selectClient(clientId, clientName, clientPrenom) {
+        document.getElementById('client-search').value = `${clientName} ${clientPrenom || ''}`.trim();
+        hideClientDropdown();
+
+        // Redirect to filtered view
+        window.location.href = "{{ route('clients.index') }}?client_id=" + clientId;
+    }
+
+    function showClientDropdown() {
+        highlightedIndex = -1;
+        const query = document.getElementById('client-search').value;
+        if (query.length > 0) {
+            searchClients(query);
+        } else {
+            displayClients(allClients.slice(0, 20));
+        }
+    }
+
+    function hideClientDropdown() {
+        document.getElementById('client-dropdown').classList.add('hidden');
+        highlightedIndex = -1;
+    }
+
+    // Attach keyboard listener
+    document.getElementById('client-search').addEventListener('keydown', handleKeydown);
+</script>
+
 @endsection

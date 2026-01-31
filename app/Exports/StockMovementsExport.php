@@ -8,11 +8,27 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class StockMovementsExport implements FromCollection, WithHeadings
 {
+    protected $filters;
+
+    public function __construct($filters = [])
+    {
+        $this->filters = $filters;
+    }
+
     public function collection()
     {
-        return StockMovement::with(['product', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->get()
+        $query = StockMovement::with(['product', 'user'])
+            ->orderBy('created_at', 'desc');
+
+        if (!empty($this->filters['date_from'])) {
+            $query->whereDate('created_at', '>=', $this->filters['date_from']);
+        }
+
+        if (!empty($this->filters['date_to'])) {
+            $query->whereDate('created_at', '<=', $this->filters['date_to']);
+        }
+
+        return $query->get()
             ->map(function ($movement) {
                 return [
                     'Type'     => $movement->movement,

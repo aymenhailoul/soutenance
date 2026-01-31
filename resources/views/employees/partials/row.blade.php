@@ -1,9 +1,9 @@
 <tr id="employee-row-{{ $employee->id }}" class="hover:bg-gray-50">
     <td class="px-6 py-4">
-        <div class="font-medium text-gray-900">{{ $employee->name }}</div>
+        <div class="font-medium text-gray-900 capitalize">{{ $employee->name }}</div>
     </td>
 
-    <td class="px-6 py-4 text-gray-700">{{ $employee->cin }}</td>
+    <td class="px-6 py-4 text-gray-700 uppercase">{{ $employee->cin }}</td>
     <td class="px-6 py-4 text-gray-700">{{ number_format($employee->salary, 2) }} DH</td>
     <td class="px-6 py-4 text-gray-700">{{ $employee->joined_at->format('Y-m-d') }}</td>
 

@@ -15,7 +15,7 @@ class StockController extends Controller
     public function index(): View
     {
         return view('stock.index', [
-            'products' => Product::query()->where('type', 'Product')->orderBy('name')->get(),
+            'products' => Product::query()->where('type', 'Produit')->orderBy('name')->get(),
         ]);
     }
 
@@ -98,24 +98,36 @@ class StockController extends Controller
             }
         });
 
-        return redirect()->route('stock.index')->with('success', 'Stock movement recorded successfully.');
+        return redirect()->route('stock.index')->with('success', 'Mouvement de stock enregistré avec succès.');
     }
 
-    public function movements(): View
+    public function movements(Request $request): View
     {
-        $movements = StockMovement::with(['product', 'user'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $query = StockMovement::with(['product', 'user'])
+            ->orderBy('created_at', 'desc');
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
 
         return view('stock.movements', [
-            'movements' => $movements,
+            'movements' => $query->paginate(10)->withQueryString(),
         ]);
     }
 
-    public function exportMovements()
+    public function exportMovements(Request $request)
     {
+        $filters = [
+            'date_from' => $request->date_from,
+            'date_to' => $request->date_to,
+        ];
+
         return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\StockMovementsExport(),
+            new \App\Exports\StockMovementsExport($filters),
             'mouvements_stock_' . date('Y-m-d_His') . '.xlsx'
         );
     }

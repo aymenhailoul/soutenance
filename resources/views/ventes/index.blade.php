@@ -6,30 +6,98 @@
     <div class="p-8">
         <div class="mb-6 flex items-center justify-between">
             <h1 class="text-3xl font-bold text-gray-900">Ventes</h1>
-            <a href="{{ route('ventes.export') }}"
-                class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 transition-colors">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                    </path>
-                </svg>
-                Export
-            </a>
+            @if(request('client_id') || request('date_from') || request('date_to') || request('invoice_number'))
+                <a href="{{ route('ventes.export', ['client_id' => request('client_id'), 'date_from' => request('date_from'), 'date_to' => request('date_to'), 'invoice_number' => request('invoice_number')]) }}"
+                    class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-700 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                        </path>
+                    </svg>
+                    Export
+                </a>
+            @endif
         </div>
 
-        <!-- Search Bar -->
+        <!-- Filters Section -->
         <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <div class="relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
+            <form method="GET" action="{{ route('ventes.index') }}" id="filter-form">
+                <div class="flex flex-wrap items-end gap-4">
+                    <!-- Client Filter -->
+                    <div class="relative flex-1 min-w-[200px] max-w-md">
+                        <label class="block text-sm font-semibold text-gray-900 mb-2" for="client-search">
+                            Filtrer par client
+                        </label>
+                        <input type="hidden" name="client_id" id="client-id-input" value="{{ request('client_id') }}">
+                        <div class="relative">
+                            <input type="text" id="client-search" autocomplete="off"
+                                placeholder="Taper nom ou prénom du client"
+                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                value="{{ request('client_id') ? $allClients->firstWhere('id', request('client_id'))?->name . ' ' . $allClients->firstWhere('id', request('client_id'))?->prenom : '' }}"
+                                oninput="searchClients(this.value)" onfocus="showClientDropdown()"
+                                onblur="setTimeout(() => hideClientDropdown(), 200)" />
+                            <div id="client-dropdown"
+                                class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto uppercase">
+                                <!-- Clients will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date From -->
+                    <div class="min-w-[160px]">
+                        <label class="block text-sm font-semibold text-gray-900 mb-2" for="date-from">
+                            Date début
+                        </label>
+                        <input type="date" id="date-from" name="date_from" value="{{ request('date_from') }}"
+                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
+                    </div>
+
+                    <!-- Date To -->
+                    <div class="min-w-[160px]">
+                        <label class="block text-sm font-semibold text-gray-900 mb-2" for="date-to">
+                            Date fin
+                        </label>
+                        <input type="date" id="date-to" name="date_to" value="{{ request('date_to') }}"
+                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
+                    </div>
+
+                    <!-- Invoice Number Search -->
+                    <div class="min-w-[200px]">
+                        <label class="block text-sm font-semibold text-gray-900 mb-2" for="invoice-number">
+                            N° Facture
+                        </label>
+                        <input type="text" id="invoice-number" name="invoice_number" value="{{ request('invoice_number') }}"
+                            placeholder="Rechercher..."
+                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500" />
+                    </div>
+
+                    <!-- Apply Button -->
+                    <div>
+                        <button type="submit"
+                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                            </svg>
+                            Appliquer
+                        </button>
+                    </div>
+
+                    <!-- Clear Filter Button -->
+                    @if(request('client_id') || request('date_from') || request('date_to') || request('invoice_number'))
+                        <div>
+                            <a href="{{ route('ventes.index') }}"
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Effacer filtres
+                            </a>
+                        </div>
+                    @endif
                 </div>
-                <input type="text" id="search-input" placeholder="Rechercher par numéro de facture ou nom de client"
-                    class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    oninput="filterInvoices()" />
-            </div>
+            </form>
         </div>
 
         <!-- Invoices Table -->
@@ -67,7 +135,7 @@
                                 {{ $invoice->invoice_number }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {{ ($invoice->client->prenom ?? '') . ' ' . ($invoice->client->name ?? 'N/A') }}
+                                {{ ($invoice->client->name ?? 'N/A') . ' ' . ($invoice->client->prenom ?? '') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 {{ number_format($invoice->total_amount, 2, '.', '') }} MAD
@@ -115,11 +183,6 @@
         <!-- Pagination -->
         <div class="mt-6">
             {{ $invoices->links() }}
-        </div>
-
-        <!-- No Results Message -->
-        <div id="no-results" class="hidden bg-white rounded-lg shadow p-8 text-center text-gray-500 mt-6">
-            Aucune facture ne correspond à votre recherche
         </div>
     </div>
 
@@ -185,11 +248,24 @@
                     </div>
                 </div>
 
+                <!-- Credit Notes Section -->
+                <div id="credit-notes-section" class="hidden mt-4 pt-4 border-t border-gray-200">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2">Avoirs liés:</h4>
+                    <div id="credit-notes-list" class="space-y-2"></div>
+                </div>
+
                 <!-- Footer Buttons -->
                 <div class="flex justify-end gap-3 mt-6">
                     <button onclick="closeInvoiceModal()"
                         class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
                         Exit
+                    </button>
+                    <button id="create-return-btn"
+                        class="hidden px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                        </svg>
+                        Créer un retour
                     </button>
                     <button id="cancel-invoice-btn"
                         class="hidden px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
@@ -204,40 +280,188 @@
         </div>
     </div>
 
+    <!-- Return Modal -->
+    <div id="return-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/30"
+        onclick="closeReturnModalOnBackdrop(event)">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900">Créer un Retour (Avoir)</h2>
+                    <button onclick="closeReturnModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Reference Info -->
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                    <p class="text-sm text-yellow-800">
+                        <strong>Facture:</strong> <span id="return-invoice-number"></span>
+                    </p>
+                </div>
+
+                <!-- Items to Return -->
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-900 mb-2">Sélectionnez les articles à retourner:</label>
+                    <div id="return-items-container" class="space-y-3"></div>
+                </div>
+
+                <!-- Reason -->
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-900 mb-2" for="return-reason">Motif du retour (optionnel):</label>
+                    <textarea id="return-reason" rows="2" 
+                        class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                        placeholder="Ex: Produit défectueux, Changement d'avis..."></textarea>
+                </div>
+
+                <!-- Total Credit -->
+                <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+                    <div class="flex justify-between items-center">
+                        <span class="text-lg font-semibold text-gray-900">Total Crédit:</span>
+                        <span class="text-2xl font-bold text-red-600" id="return-total">0.00 MAD</span>
+                    </div>
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="flex justify-end gap-3">
+                    <button onclick="closeReturnModal()"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                        Annuler
+                    </button>
+                    <button id="confirm-return-btn" onclick="submitReturn()"
+                        class="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        Confirmer le Retour
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let allInvoices = @json($invoices);
+        // Client search dropdown functionality
+        let allClients = @json($allClients);
+        let searchTimeout;
+        let highlightedIndex = -1;
+        let currentFilteredClients = [];
 
-        function filterInvoices() {
-            const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            const rows = document.querySelectorAll('.invoice-row');
-            let visibleCount = 0;
+        function searchClients(query) {
+            clearTimeout(searchTimeout);
+            highlightedIndex = -1;
 
-            rows.forEach(row => {
-                const invoiceNumber = row.dataset.invoiceNumber;
-                const clientPrenom = row.dataset.clientPrenom;
-                const clientName = row.dataset.clientName;
-                const fullClientName = (clientPrenom + ' ' + clientName).trim();
+            if (query.length < 1) {
+                hideClientDropdown();
+                return;
+            }
 
-                if (invoiceNumber.includes(searchTerm) || fullClientName.includes(searchTerm)) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
+            searchTimeout = setTimeout(() => {
+                const filtered = allClients.filter(c => {
+                    const queryLower = query.toLowerCase();
+                    const nameMatch = c.name.toLowerCase().startsWith(queryLower);
+                    const prenomMatch = c.prenom && c.prenom.toLowerCase().startsWith(queryLower);
+                    // Also check full name
+                    const fullName = (c.name + ' ' + (c.prenom || '')).toLowerCase();
+                    const fullNameMatch = fullName.startsWith(queryLower);
+                    return nameMatch || prenomMatch || fullNameMatch;
+                });
+
+                currentFilteredClients = filtered;
+                displayClients(filtered);
+            }, 100);
+        }
+
+        function displayClients(filteredClients) {
+            const dropdown = document.getElementById('client-dropdown');
+            dropdown.innerHTML = '';
+            currentFilteredClients = filteredClients;
+
+            if (filteredClients.length === 0) {
+                dropdown.innerHTML = '<div class="px-4 py-2 text-gray-500">Aucun client trouvé</div>';
+                dropdown.classList.remove('hidden');
+                return;
+            }
+
+            filteredClients.forEach((client, index) => {
+                const item = document.createElement('div');
+                item.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer dropdown-item';
+                if (index === highlightedIndex) {
+                    item.classList.add('bg-blue-100');
                 }
+                item.dataset.index = index;
+                let display = `${client.name} ${client.prenom || ''}`;
+                item.textContent = display;
+                item.onclick = () => selectClient(client.id, client.name, client.prenom);
+                dropdown.appendChild(item);
             });
 
-            // Show/hide no results message
-            const noResults = document.getElementById('no-results');
-            const table = document.querySelector('.bg-white.rounded-lg.shadow.overflow-hidden');
+            dropdown.classList.remove('hidden');
+        }
 
-            if (visibleCount === 0 && searchTerm !== '') {
-                noResults.classList.remove('hidden');
-                table.classList.add('hidden');
-            } else {
-                noResults.classList.add('hidden');
-                table.classList.remove('hidden');
+        function updateHighlight() {
+            const dropdown = document.getElementById('client-dropdown');
+            const items = dropdown.querySelectorAll('.dropdown-item');
+            items.forEach((item, index) => {
+                if (index === highlightedIndex) {
+                    item.classList.add('bg-blue-100');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('bg-blue-100');
+                }
+            });
+        }
+
+        function handleKeydown(event) {
+            const dropdown = document.getElementById('client-dropdown');
+            if (dropdown.classList.contains('hidden')) return;
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                if (highlightedIndex < currentFilteredClients.length - 1) {
+                    highlightedIndex++;
+                    updateHighlight();
+                }
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (highlightedIndex > 0) {
+                    highlightedIndex--;
+                    updateHighlight();
+                }
+            } else if (event.key === 'Enter') {
+                event.preventDefault();
+                if (highlightedIndex >= 0 && highlightedIndex < currentFilteredClients.length) {
+                    const client = currentFilteredClients[highlightedIndex];
+                    selectClient(client.id, client.name, client.prenom);
+                }
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                hideClientDropdown();
             }
         }
+
+        function selectClient(clientId, clientName, clientPrenom) {
+            document.getElementById('client-search').value = `${clientName} ${clientPrenom || ''}`.trim();
+            document.getElementById('client-id-input').value = clientId;
+            hideClientDropdown();
+        }
+
+        function showClientDropdown() {
+            highlightedIndex = -1;
+            const query = document.getElementById('client-search').value;
+            if (query.length > 0) {
+                searchClients(query);
+            } else {
+                displayClients(allClients.slice(0, 20));
+            }
+        }
+
+        function hideClientDropdown() {
+            document.getElementById('client-dropdown').classList.add('hidden');
+            highlightedIndex = -1;
+        }
+
+        // Attach keyboard listener
+        document.getElementById('client-search').addEventListener('keydown', handleKeydown);
 
         function showInvoiceDetails(invoiceId) {
             fetch(`/ventes/${invoiceId}`)
@@ -300,11 +524,49 @@
 
                     // Show/hide cancel button based on status
                     const cancelBtn = document.getElementById('cancel-invoice-btn');
+                    const createReturnBtn = document.getElementById('create-return-btn');
+                    const creditNotesSection = document.getElementById('credit-notes-section');
+                    
                     if (invoice.status === 'Finalized') {
                         cancelBtn.classList.remove('hidden');
                         cancelBtn.onclick = () => cancelInvoice(invoice.id);
+                        
+                        // Show return button
+                        createReturnBtn.classList.remove('hidden');
+                        createReturnBtn.onclick = () => openReturnModal(invoice);
                     } else {
                         cancelBtn.classList.add('hidden');
+                        createReturnBtn.classList.add('hidden');
+                    }
+
+                    // Display credit notes if any
+                    if (invoice.credit_notes && invoice.credit_notes.length > 0) {
+                        creditNotesSection.classList.remove('hidden');
+                        const creditNotesList = document.getElementById('credit-notes-list');
+                        creditNotesList.innerHTML = '';
+                        
+                        invoice.credit_notes.forEach(cn => {
+                            const cnDate = new Date(cn.credit_date).toLocaleDateString('fr-FR');
+                            const cnHtml = `
+                                <div class="flex items-center justify-between bg-orange-50 rounded-lg px-3 py-2">
+                                    <div>
+                                        <span class="font-medium text-orange-800">${cn.credit_note_number}</span>
+                                        <span class="text-sm text-gray-600 ml-2">${cnDate}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-red-600 font-semibold">-${parseFloat(cn.total_amount).toFixed(2)} MAD</span>
+                                        <a href="/credit-notes/${cn.id}/pdf" class="text-blue-600 hover:text-blue-800">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                            creditNotesList.innerHTML += cnHtml;
+                        });
+                    } else {
+                        creditNotesSection.classList.add('hidden');
                     }
 
                     // Show modal
@@ -360,5 +622,184 @@
                 alert('Erreur lors de l\'annulation de la facture');
             });
         }
+
+        // ========== RETURN MODAL FUNCTIONS ==========
+        let currentReturnInvoice = null;
+
+        function openReturnModal(invoice) {
+            currentReturnInvoice = invoice;
+            document.getElementById('return-invoice-number').textContent = invoice.invoice_number;
+            document.getElementById('return-reason').value = '';
+            
+            // Build items list
+            const container = document.getElementById('return-items-container');
+            container.innerHTML = '';
+            
+            invoice.items.forEach((item, index) => {
+                // Skip services - they cannot be returned
+                if (item.product?.type === 'Service') return;
+                
+                // Calculate already returned quantity (we'll need to track this)
+                const alreadyReturned = item.returned_quantity || 0;
+                const availableQty = item.quantity - alreadyReturned;
+                
+                if (availableQty <= 0) return; // Skip fully returned items
+                
+                const itemHtml = `
+                    <div class="border border-gray-200 rounded-lg p-3 return-item" data-item-id="${item.id}" data-unit-price="${item.unit_price}" data-discount="${item.discount}" data-original-qty="${item.quantity}">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" id="return-item-${item.id}" class="return-item-checkbox w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500" onchange="toggleReturnItem(this, ${item.id})">
+                                <label for="return-item-${item.id}" class="cursor-pointer">
+                                    <span class="font-medium text-gray-900">${item.product?.name || 'N/A'}</span>
+                                    <span class="text-sm text-gray-500 ml-2">(${item.product?.type || 'Produit'})</span>
+                                </label>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                ${parseFloat(item.unit_price).toFixed(2)} MAD × ${item.quantity}
+                            </div>
+                        </div>
+                        <div class="mt-2 flex items-center gap-3 return-qty-container hidden">
+                            <label class="text-sm text-gray-600">Quantité à retourner:</label>
+                            <input type="number" min="1" max="${availableQty}" value="${availableQty}" 
+                                class="return-qty-input w-20 rounded-lg border-gray-300 text-sm focus:border-orange-500 focus:ring-orange-500"
+                                data-item-id="${item.id}" onchange="calculateReturnTotal()">
+                            <span class="text-xs text-gray-500">(max: ${availableQty})</span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += itemHtml;
+            });
+            
+            // Reset total
+            document.getElementById('return-total').textContent = '0.00 MAD';
+            document.getElementById('confirm-return-btn').disabled = true;
+            
+            // Show return modal
+            document.getElementById('return-modal').classList.remove('hidden');
+        }
+
+        function toggleReturnItem(checkbox, itemId) {
+            const itemContainer = checkbox.closest('.return-item');
+            const qtyContainer = itemContainer.querySelector('.return-qty-container');
+            
+            if (checkbox.checked) {
+                qtyContainer.classList.remove('hidden');
+            } else {
+                qtyContainer.classList.add('hidden');
+            }
+            
+            calculateReturnTotal();
+        }
+
+        function calculateReturnTotal() {
+            let total = 0;
+            let hasSelectedItems = false;
+            
+            document.querySelectorAll('.return-item-checkbox:checked').forEach(checkbox => {
+                hasSelectedItems = true;
+                const itemContainer = checkbox.closest('.return-item');
+                const unitPrice = parseFloat(itemContainer.dataset.unitPrice);
+                const originalDiscount = parseFloat(itemContainer.dataset.discount);
+                const originalQty = parseInt(itemContainer.dataset.originalQty);
+                const returnQty = parseInt(itemContainer.querySelector('.return-qty-input').value) || 0;
+                
+                // Calculate proportional discount
+                const discountPerUnit = originalDiscount / originalQty;
+                const itemDiscount = discountPerUnit * returnQty;
+                
+                const itemTotal = (unitPrice * returnQty) - itemDiscount;
+                total += itemTotal;
+            });
+            
+            document.getElementById('return-total').textContent = `${total.toFixed(2)} MAD`;
+            document.getElementById('confirm-return-btn').disabled = !hasSelectedItems;
+        }
+
+        function closeReturnModal() {
+            document.getElementById('return-modal').classList.add('hidden');
+            currentReturnInvoice = null;
+        }
+
+        function closeReturnModalOnBackdrop(event) {
+            if (event.target.id === 'return-modal') {
+                closeReturnModal();
+            }
+        }
+
+        function submitReturn() {
+            if (!currentReturnInvoice) return;
+            
+            const items = [];
+            document.querySelectorAll('.return-item-checkbox:checked').forEach(checkbox => {
+                const itemContainer = checkbox.closest('.return-item');
+                const itemId = parseInt(itemContainer.dataset.itemId);
+                const returnQty = parseInt(itemContainer.querySelector('.return-qty-input').value) || 0;
+                
+                if (returnQty > 0) {
+                    items.push({
+                        invoice_item_id: itemId,
+                        quantity: returnQty
+                    });
+                }
+            });
+            
+            if (items.length === 0) {
+                alert('Veuillez sélectionner au moins un article à retourner');
+                return;
+            }
+            
+            const reason = document.getElementById('return-reason').value;
+            
+            if (!confirm('Êtes-vous sûr de vouloir créer cet avoir? Le stock sera restauré pour les produits retournés.')) {
+                return;
+            }
+            
+            document.getElementById('confirm-return-btn').disabled = true;
+            document.getElementById('confirm-return-btn').textContent = 'Création en cours...';
+            
+            fetch('/credit-notes', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    invoice_id: currentReturnInvoice.id,
+                    reason: reason,
+                    items: items
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Avoir ${data.credit_note_number} créé avec succès!`);
+                    
+                    // Ask if user wants to download the PDF
+                    if (confirm('Voulez-vous télécharger le PDF de l\'avoir?')) {
+                        window.location.href = data.pdf_url;
+                    }
+                    
+                    window.location.reload();
+                } else {
+                    alert('Erreur: ' + data.message);
+                    document.getElementById('confirm-return-btn').disabled = false;
+                    document.getElementById('confirm-return-btn').textContent = 'Confirmer le Retour';
+                }
+            })
+            .catch(error => {
+                console.error('Error creating credit note:', error);
+                alert('Erreur lors de la création de l\'avoir');
+                document.getElementById('confirm-return-btn').disabled = false;
+                document.getElementById('confirm-return-btn').textContent = 'Confirmer le Retour';
+            });
+        }
+
+        // Close return modal on Escape key
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closeReturnModal();
+            }
+        });
     </script>
 @endsection

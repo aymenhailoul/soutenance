@@ -67,7 +67,7 @@
                             oninput="searchEmployees(this.value)" onfocus="showEmployeeDropdown()"
                             onblur="setTimeout(() => hideEmployeeDropdown(), 200)" />
                         <div id="employee-dropdown"
-                            class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto capitalize">
                             <!-- Employees will be populated here -->
                         </div>
                     </div>
@@ -115,6 +115,23 @@
     <!-- Pagination -->
     <div class="mt-6">
         {{ $employees->links() }}
+    </div>
+
+    <!-- Total Salary Card -->
+    <div class="mt-6 bg-white rounded-lg shadow px-6 py-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="p-3 bg-green-100 rounded-full">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total des Salaires</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ number_format($totalSalary, 2) }} DH</p>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -224,9 +241,12 @@
     // Employee search dropdown functionality
     let allEmployees = @json($allEmployees);
     let searchTimeout;
+    let highlightedIndex = -1;
+    let currentFilteredEmployees = [];
 
     function searchEmployees(query) {
         clearTimeout(searchTimeout);
+        highlightedIndex = -1;
 
         if (query.length < 1) {
             hideEmployeeDropdown();
@@ -241,6 +261,7 @@
                 return nameMatch || cinMatch;
             });
 
+            currentFilteredEmployees = filtered;
             displayEmployees(filtered);
         }, 100);
     }
@@ -248,6 +269,7 @@
     function displayEmployees(filteredEmployees) {
         const dropdown = document.getElementById('employee-dropdown');
         dropdown.innerHTML = '';
+        currentFilteredEmployees = filteredEmployees;
 
         if (filteredEmployees.length === 0) {
             dropdown.innerHTML = '<div class="px-4 py-2 text-gray-500">Aucun employé trouvé</div>';
@@ -255,15 +277,60 @@
             return;
         }
 
-        filteredEmployees.forEach(employee => {
+        filteredEmployees.forEach((employee, index) => {
             const item = document.createElement('div');
-            item.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer';
+            item.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer dropdown-item';
+            if (index === highlightedIndex) {
+                item.classList.add('bg-blue-100');
+            }
+            item.dataset.index = index;
             item.textContent = `${employee.name} (${employee.cin})`;
             item.onclick = () => selectEmployee(employee.id, employee.name);
             dropdown.appendChild(item);
         });
 
         dropdown.classList.remove('hidden');
+    }
+
+    function updateHighlight() {
+        const dropdown = document.getElementById('employee-dropdown');
+        const items = dropdown.querySelectorAll('.dropdown-item');
+        items.forEach((item, index) => {
+            if (index === highlightedIndex) {
+                item.classList.add('bg-blue-100');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('bg-blue-100');
+            }
+        });
+    }
+
+    function handleKeydown(event) {
+        const dropdown = document.getElementById('employee-dropdown');
+        if (dropdown.classList.contains('hidden')) return;
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            if (highlightedIndex < currentFilteredEmployees.length - 1) {
+                highlightedIndex++;
+                updateHighlight();
+            }
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            if (highlightedIndex > 0) {
+                highlightedIndex--;
+                updateHighlight();
+            }
+        } else if (event.key === 'Enter') {
+            event.preventDefault();
+            if (highlightedIndex >= 0 && highlightedIndex < currentFilteredEmployees.length) {
+                const employee = currentFilteredEmployees[highlightedIndex];
+                selectEmployee(employee.id, employee.name);
+            }
+        } else if (event.key === 'Escape') {
+            event.preventDefault();
+            hideEmployeeDropdown();
+        }
     }
 
     function selectEmployee(employeeId, employeeName) {
@@ -275,6 +342,7 @@
     }
 
     function showEmployeeDropdown() {
+        highlightedIndex = -1;
         const query = document.getElementById('employee-search').value;
         if (query.length > 0) {
             searchEmployees(query);
@@ -285,7 +353,11 @@
 
     function hideEmployeeDropdown() {
         document.getElementById('employee-dropdown').classList.add('hidden');
+        highlightedIndex = -1;
     }
+
+    // Attach keyboard listener
+    document.getElementById('employee-search').addEventListener('keydown', handleKeydown);
 </script>
 
 @endsection
