@@ -29,7 +29,10 @@ class ChargesExport implements FromCollection, WithHeadings
             ->where('movement', 'Entrée')
             ->where(function ($q) {
                 $q->whereNull('comment')
-                    ->orWhere('comment', 'not like', '%Annulation%');
+                    ->orWhere(function ($subQ) {
+                        $subQ->where('comment', 'not like', '%Annulation%')
+                             ->where('comment', 'not like', '%Retour%');
+                    });
             })
             ->whereHas('product', function ($q) {
                 $q->where('type', 'Produit');

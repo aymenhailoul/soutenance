@@ -7,7 +7,7 @@
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Tableau de Bord</h1>
 
         <div class="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 class="text-xl font-semibold mb-2">Bonjour, {{ auth()->user()->name }}</h2>
+            <h2 class="text-xl font-semibold mb-2 capitalize">Bonjour, {{ auth()->user()->name }}</h2>
             <p class="text-gray-600">Voici un aperçu de vos opérations commerciales</p>
         </div>
 
@@ -24,7 +24,7 @@
                     </div>
                     <div>
                         <p class="text-gray-600 text-sm font-medium">Total Produits</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ $totalProducts }}</p>
+                        <p class="text-3xl font-bold text-gray-900 count-up" data-target="{{ $totalProducts }}">0</p>
                     </div>
                 </div>
             </div>
@@ -42,8 +42,7 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-gray-600 text-sm font-medium">Total Ventes</p>
-                            <p class="text-2xl font-bold text-gray-900 break-words">{{ number_format($totalSales, 2, '.', '') }}
-                                MAD</p>
+                            <p class="text-2xl font-bold text-gray-900 break-words count-up" data-target="{{ $totalSales }}" data-decimals="2" data-suffix=" MAD">0.00 MAD</p>
                         </div>
                     </div>
                 </div>
@@ -61,7 +60,7 @@
                     </div>
                     <div>
                         <p class="text-gray-600 text-sm font-medium">Total Clients</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ $totalClients }}</p>
+                        <p class="text-3xl font-bold text-gray-900 count-up" data-target="{{ $totalClients }}">0</p>
                     </div>
                 </div>
             </div>
@@ -78,10 +77,56 @@
                     </div>
                     <div>
                         <p class="text-gray-600 text-sm font-medium">Total Facturations</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ $totalInvoices }}</p>
+                        <p class="text-3xl font-bold text-gray-900 count-up" data-target="{{ $totalInvoices }}">0</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const counters = document.querySelectorAll('.count-up');
+        const duration = 1500; // Animation duration in milliseconds
+        
+        counters.forEach(counter => {
+            const target = parseFloat(counter.dataset.target);
+            const decimals = parseInt(counter.dataset.decimals) || 0;
+            const suffix = counter.dataset.suffix || '';
+            const startTime = performance.now();
+            
+            function easeOutQuart(t) {
+                return 1 - Math.pow(1 - t, 4);
+            }
+            
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easedProgress = easeOutQuart(progress);
+                const currentValue = target * easedProgress;
+                
+                if (decimals > 0) {
+                    counter.textContent = currentValue.toFixed(decimals) + suffix;
+                } else {
+                    counter.textContent = Math.floor(currentValue) + suffix;
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    // Ensure final value is exact
+                    if (decimals > 0) {
+                        counter.textContent = target.toFixed(decimals) + suffix;
+                    } else {
+                        counter.textContent = target + suffix;
+                    }
+                }
+            }
+            
+            requestAnimationFrame(updateCounter);
+        });
+    });
+</script>
 @endsection

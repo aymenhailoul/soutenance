@@ -9,11 +9,21 @@ use Illuminate\View\View;
 
 class ClientController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        return view('clients.index', [
-            'clients' => Client::query()->orderBy('name')->orderBy('prenom')->paginate(15),
-        ]);
+        $query = Client::query();
+
+        // Filter by specific client_id (from dropdown search)
+        if ($request->filled('client_id')) {
+            $query->where('id', $request->client_id);
+        }
+
+        $clients = $query->orderBy('name')->orderBy('prenom')->paginate(15)->withQueryString();
+
+        // Get all clients for the dropdown search
+        $allClients = Client::select('id', 'name', 'prenom', 'car_brand', 'matricule')->orderBy('name')->get();
+
+        return view('clients.index', compact('clients', 'allClients'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -28,7 +38,7 @@ class ClientController extends Controller
 
         Client::create($validated);
 
-        return redirect()->route('clients.index')->with('success', 'Client created successfully.');
+        return redirect()->route('clients.index')->with('success', 'Client ajouté avec succès.');
     }
 
     public function update(Request $request, Client $client): RedirectResponse
@@ -43,7 +53,7 @@ class ClientController extends Controller
 
         $client->update($validated);
 
-        return redirect()->route('clients.index')->with('success', 'Client updated successfully.');
+        return redirect()->route('clients.index')->with('success', 'Client modifié avec succès.');
     }
 
     public function destroy(Client $client): RedirectResponse

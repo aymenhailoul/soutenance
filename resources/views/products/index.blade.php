@@ -81,7 +81,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
-                                Clear Filter
+                                Effacer filtre
                             </a>
                         </div>
                     @endif
@@ -176,7 +176,7 @@
                             <label class="block text-sm font-semibold text-gray-900 mb-2">Prix Achat</label>
                             <input id="prix-achat" type="text" name="prix_achat" value="{{ old('prix_achat') }}"
                                 class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="0.00" />
+                                placeholder="0.00" required />
 
                             @error('prix_achat')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -198,7 +198,7 @@
                             <label class="block text-sm font-semibold text-gray-900 mb-2">Code</label>
                             <input id="serial-code" name="serial_code" value="{{ old('serial_code') }}"
                                 class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="..." />
+                                placeholder="..."  required/>
 
                             @error('serial_code')
                                 <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
@@ -231,9 +231,12 @@
         // Product search dropdown functionality
         let allProducts = @json($allProducts);
         let searchTimeout;
+        let highlightedIndex = -1;
+        let currentFilteredProducts = [];
 
         function searchProducts(query) {
             clearTimeout(searchTimeout);
+            highlightedIndex = -1;
 
             if (query.length < 1) {
                 hideProductDropdown();
@@ -248,6 +251,7 @@
                     return nameMatch || serialMatch;
                 });
 
+                currentFilteredProducts = filtered;
                 displayProducts(filtered);
             }, 100);
         }
@@ -255,6 +259,7 @@
         function displayProducts(filteredProducts) {
             const dropdown = document.getElementById('product-dropdown');
             dropdown.innerHTML = '';
+            currentFilteredProducts = filteredProducts;
 
             if (filteredProducts.length === 0) {
                 dropdown.innerHTML = '<div class="px-4 py-2 text-gray-500">No products found</div>';
@@ -262,9 +267,13 @@
                 return;
             }
 
-            filteredProducts.forEach(product => {
+            filteredProducts.forEach((product, index) => {
                 const item = document.createElement('div');
-                item.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer';
+                item.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer dropdown-item';
+                if (index === highlightedIndex) {
+                    item.classList.add('bg-blue-100');
+                }
+                item.dataset.index = index;
                 // Show name and serial code if available
                 item.textContent = product.serial_code
                     ? `${product.name} (${product.serial_code})`
@@ -276,6 +285,47 @@
             dropdown.classList.remove('hidden');
         }
 
+        function updateHighlight() {
+            const dropdown = document.getElementById('product-dropdown');
+            const items = dropdown.querySelectorAll('.dropdown-item');
+            items.forEach((item, index) => {
+                if (index === highlightedIndex) {
+                    item.classList.add('bg-blue-100');
+                    item.scrollIntoView({ block: 'nearest' });
+                } else {
+                    item.classList.remove('bg-blue-100');
+                }
+            });
+        }
+
+        function handleKeydown(event) {
+            const dropdown = document.getElementById('product-dropdown');
+            if (dropdown.classList.contains('hidden')) return;
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                if (highlightedIndex < currentFilteredProducts.length - 1) {
+                    highlightedIndex++;
+                    updateHighlight();
+                }
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (highlightedIndex > 0) {
+                    highlightedIndex--;
+                    updateHighlight();
+                }
+            } else if (event.key === 'Enter') {
+                event.preventDefault();
+                if (highlightedIndex >= 0 && highlightedIndex < currentFilteredProducts.length) {
+                    const product = currentFilteredProducts[highlightedIndex];
+                    selectProduct(product.id, product.name);
+                }
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                hideProductDropdown();
+            }
+        }
+
         function selectProduct(productId, productName) {
             document.getElementById('product-search').value = productName;
             hideProductDropdown();
@@ -285,6 +335,7 @@
         }
 
         function showProductDropdown() {
+            highlightedIndex = -1;
             const query = document.getElementById('product-search').value;
             if (query.length > 0) {
                 searchProducts(query);
@@ -295,7 +346,11 @@
 
         function hideProductDropdown() {
             document.getElementById('product-dropdown').classList.add('hidden');
+            highlightedIndex = -1;
         }
+
+        // Attach keyboard listener
+        document.getElementById('product-search').addEventListener('keydown', handleKeydown);
 
         // Toggle Prix Achat and Code fields based on product type
         function toggleProductTypeFields() {

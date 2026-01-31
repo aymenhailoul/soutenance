@@ -113,6 +113,11 @@ class User extends Authenticatable
                 return true;
         }
 
+        // Special case: credit-notes access is granted if user has ventes.index permission
+        if (str_starts_with($route, 'credit-notes.') && $this->pages()->where('route', 'ventes.index')->exists()) {
+            return true;
+        }
+
         return false;
     }
 }

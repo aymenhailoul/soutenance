@@ -34,7 +34,10 @@ class EmployeeController extends Controller
         // Get all employees for the dropdown search
         $allEmployees = Employee::select('id', 'name', 'cin')->orderBy('name')->get();
 
-        return view('employees.index', compact('employees', 'allEmployees'));
+        // Calculate total salary of all employees
+        $totalSalary = Employee::sum('salary');
+
+        return view('employees.index', compact('employees', 'allEmployees', 'totalSalary'));
     }
 
     public function store(Request $request)

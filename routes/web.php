@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\FacturationController;
 use App\Http\Controllers\VenteController;
+use App\Http\Controllers\CreditNoteController;
 
 Route::middleware(['auth', 'page.permission'])->group(function () {
     Route::get('/', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
@@ -69,6 +70,13 @@ Route::middleware(['auth', 'page.permission'])->group(function () {
     Route::get('/ventes', [VenteController::class, 'index'])->name('ventes.index');
     Route::get('/ventes/{invoice}', [VenteController::class, 'show'])->name('ventes.show');
     Route::get('/ventes/export/excel', [VenteController::class, 'export'])->name('ventes.export');
+
+    // Credit Notes (Returns/Avoir) routes
+    Route::get('/retours', [CreditNoteController::class, 'index'])->name('retours.index');
+    Route::get('/retours/export/excel', [CreditNoteController::class, 'export'])->name('retours.export');
+    Route::get('/retours/{creditNote}/details', [CreditNoteController::class, 'show'])->name('retours.show');
+    Route::post('/credit-notes', [CreditNoteController::class, 'store'])->name('credit-notes.store');
+    Route::get('/credit-notes/{creditNote}/pdf', [CreditNoteController::class, 'downloadPdf'])->name('credit-notes.pdf');
 
     // Employee routes
     Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');

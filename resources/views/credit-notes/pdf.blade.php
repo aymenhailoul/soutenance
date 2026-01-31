@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Facture #{{ $invoice->invoice_number }}</title>
+    <title>Avoir #{{ $creditNote->credit_note_number }}</title>
     <style>
         body {
             font-family: 'Helvetica', sans-serif;
@@ -13,7 +13,7 @@
         .header {
             width: 100%;
             margin-bottom: 40px;
-            border-bottom: 2px solid #ddd;
+            border-bottom: 2px solid #c0392b;
             padding-bottom: 20px;
         }
         .company-info {
@@ -22,6 +22,21 @@
         .invoice-info {
             float: right;
             text-align: right;
+        }
+        .avoir-badge {
+            background-color: #c0392b;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .reference-info {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
         }
         .client-info {
             margin-top: 30px;
@@ -55,17 +70,9 @@
             width: 300px;
             float: right;
         }
-        .total-row {
-            padding: 5px 0;
-            display: flex;
-            justify-content: space-between;
-        }
-        .grand-total {
-            font-size: 18px;
+        .credit-total {
+            color: #c0392b;
             font-weight: bold;
-            border-top: 2px solid #333;
-            padding-top: 10px;
-            margin-top: 10px;
         }
         .footer {
             position: fixed;
@@ -82,6 +89,13 @@
             clear: both;
             display: table;
         }
+        .reason-box {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -91,33 +105,45 @@
             <p>123 Business Street<br>Casablanca, Morocco<br>+212 600 000 000</p>
         </div>
         <div class="invoice-info">
-            <h2 style="margin: 0; color: #555;">FACTURE</h2>
-            <p><strong>N°:</strong> {{ $invoice->invoice_number }}<br>
-            <strong>Date:</strong> {{ $invoice->invoice_date->format('d/m/Y') }}<br>
-            <strong>Statut:</strong> {{ $invoice->status }}</p>
+            <div class="avoir-badge">AVOIR</div>
+            <p><strong>N°:</strong> {{ $creditNote->credit_note_number }}<br>
+            <strong>Date:</strong> {{ $creditNote->credit_date->format('d/m/Y') }}</p>
         </div>
     </div>
 
-    <div class="client-info">
-        <h3 style="margin-top: 0; margin-bottom: 10px;">Facturé à:</h3>
-        <strong>{{ $invoice->client->name }} {{ $invoice->client->prenom }}</strong><br>
-        @if($invoice->client->phone) Tél: {{ $invoice->client->phone }}<br> @endif
-        @if($invoice->client->car_brand) Voiture: {{ $invoice->client->car_brand }} @endif
-        @if($invoice->client->matricule) ({{ $invoice->client->matricule }}) @endif
+    <div class="reference-info">
+        <strong>⚠️ Document de crédit référençant:</strong><br>
+        Facture N° <strong>{{ $creditNote->invoice->invoice_number }}</strong> 
+        du {{ $creditNote->invoice->invoice_date->format('d/m/Y') }}
     </div>
+
+    <div class="client-info">
+        <h3 style="margin-top: 0; margin-bottom: 10px;">Client:</h3>
+        <strong>{{ $creditNote->client->name }} {{ $creditNote->client->prenom }}</strong><br>
+        @if($creditNote->client->phone) Tél: {{ $creditNote->client->phone }}<br> @endif
+        @if($creditNote->client->car_brand) Voiture: {{ $creditNote->client->car_brand }} @endif
+        @if($creditNote->client->matricule) ({{ $creditNote->client->matricule }}) @endif
+    </div>
+
+    @if($creditNote->reason)
+    <div class="reason-box">
+        <strong>Motif du retour:</strong><br>
+        {{ $creditNote->reason }}
+    </div>
+    @endif
 
     <table class="table">
         <thead>
             <tr>
-                <th style="width: 40%">Produit / Service</th>
+                <th style="width: 40%">Produit / Service Retourné</th>
                 <th class="text-center">Qté</th>
                 <th class="text-right">Prix Unit.</th>
                 <th class="text-right">Remise</th>
-                <th class="text-right">Total</th>
+                <th class="text-right">Crédit</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($invoice->items as $item)
+            @foreach($creditNote->items as $item)
             <tr>
                 <td>
                     <b>{{ $item->product->name }}</b>
@@ -126,8 +152,8 @@
                 <td class="text-left">{{ $item->quantity }}</td>
                 <td class="text-left">{{ number_format($item->unit_price, 2) }} DH</td>
                 <td class="text-left">{{ number_format($item->discount, 2) }} DH</td>
-                <td class="text-left">
-                    {{ number_format(($item->quantity * $item->unit_price) - $item->discount, 2) }} DH
+                <td class="text-left credit-total">
+                    -{{ number_format(($item->quantity * $item->unit_price) - $item->discount, 2) }} DH
                 </td>
             </tr>
             @endforeach
@@ -140,30 +166,27 @@
                 <tr>
                     <td><strong>Sous-total:</strong></td>
                     <td class="text-right">
-                        {{ number_format($invoice->items->sum(function($item) { return $item->quantity * $item->unit_price; }), 2) }} DH
+                        {{ number_format($creditNote->items->sum(function($item) { return $item->quantity * $item->unit_price; }), 2) }} DH
                     </td>
                 </tr>
                 <tr>
                     <td><strong>Remise Total:</strong></td>
-                    <td class="text-right" style="color: red">
-                        - {{ number_format($invoice->items->sum('discount'), 2) }} DH
+                    <td class="text-right" style="color: green">
+                        - {{ number_format($creditNote->items->sum('discount'), 2) }} DH
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2"><div style="border-bottom: 2px solid #eee; margin: 10px 0;"></div></td>
                 </tr>
                 <tr>
-                    <td><strong style="font-size: 16px;">Total à Payer:</strong></td>
+                    <td><strong style="font-size: 16px;">Total Crédit:</strong></td>
                     <td class="text-right">
-                        <strong style="font-size: 16px;">{{ number_format($invoice->total_amount, 2) }} DH</strong>
+                        <strong style="font-size: 16px; color: #c0392b;">-{{ number_format($creditNote->total_amount, 2) }} DH</strong>
                     </td>
                 </tr>
             </table>
         </div>
     </div>
 
-    <div class="footer">
-        <p>Merci pour votre confiance !</p>
-    </div>
 </body>
 </html>

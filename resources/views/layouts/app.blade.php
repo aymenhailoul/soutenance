@@ -10,66 +10,120 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ asset('auto-style.png') }}">
     <style>
-        /* Sidebar collapse/expand styles */
-        .sidebar {
-            width: 5rem;
-            transition: width 0.3s ease;
+        /* Desktop Sidebar collapse/expand styles */
+        @media (min-width: 768px) {
+            .sidebar {
+                width: 5rem;
+                transition: width 0.3s ease;
+            }
+
+            .sidebar:hover {
+                width: 18rem;
+            }
+
+            .sidebar .sidebar-label {
+                opacity: 0;
+                width: 0;
+                transition: opacity 0.2s ease, width 0.3s ease;
+            }
+
+            .sidebar:hover .sidebar-label {
+                opacity: 1;
+                width: auto;
+            }
+
+            .sidebar .sidebar-title {
+                opacity: 0;
+                width: 0;
+                overflow: hidden;
+                transition: opacity 0.2s ease;
+            }
+
+            .sidebar:hover .sidebar-title {
+                opacity: 1;
+                width: auto;
+            }
+
+            .sidebar .logout-text {
+                opacity: 0;
+                width: 0;
+                overflow: hidden;
+                transition: opacity 0.2s ease;
+            }
+
+            .sidebar:hover .logout-text {
+                opacity: 1;
+                width: auto;
+            }
         }
 
-        .sidebar:hover {
-            width: 18rem;
-        }
+        /* Mobile Sidebar styles */
+        @media (max-width: 767px) {
+            .sidebar {
+                width: 18rem;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
 
-        .sidebar .sidebar-label {
-            opacity: 0;
-            width: 0;
-            transition: opacity 0.2s ease, width 0.3s ease;
-        }
+            .sidebar.open {
+                transform: translateX(0);
+            }
 
-        .sidebar:hover .sidebar-label {
-            opacity: 1;
-            width: auto;
-        }
+            .sidebar .sidebar-label,
+            .sidebar .sidebar-title,
+            .sidebar .logout-text {
+                opacity: 1;
+                width: auto;
+            }
 
-        .sidebar .sidebar-title {
-            opacity: 0;
-            width: 0;
-            overflow: hidden;
-            transition: opacity 0.2s ease;
-        }
+            .mobile-overlay {
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+            }
 
-        .sidebar:hover .sidebar-title {
-            opacity: 1;
-            width: auto;
-        }
-
-        .sidebar .logout-text {
-            opacity: 0;
-            width: 0;
-            overflow: hidden;
-            transition: opacity 0.2s ease;
-        }
-
-        .sidebar:hover .logout-text {
-            opacity: 1;
-            width: auto;
+            .mobile-overlay.open {
+                opacity: 1;
+                visibility: visible;
+            }
         }
     </style>
 </head>
 
 <body class="bg-gray-50">
+    <!-- Mobile Header -->
+    <header class="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40 px-4 py-3 flex items-center justify-between">
+        <button id="mobile-menu-btn" class="p-2 rounded-lg text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+        <div class="flex items-center gap-2">
+            <img src="{{ asset('auto-style.png') }}" alt="Auto Style" class="w-8 h-8">
+            <span class="font-bold text-gray-700">AUTO STYLE</span>
+        </div>
+        <div class="w-10"></div> <!-- Spacer for centering -->
+    </header>
+
+    <!-- Mobile Overlay -->
+    <div id="mobile-overlay" class="mobile-overlay md:hidden fixed inset-0 bg-black/50 z-30"></div>
+
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside class="sidebar bg-white border-r border-gray-200 flex flex-col fixed h-full z-30">
+        <aside id="sidebar" class="sidebar bg-white border-r border-gray-200 flex flex-col fixed h-full z-40 md:z-30">
+            <!-- Close button for mobile -->
+            <button id="mobile-close-btn" class="md:hidden absolute top-4 right-4 p-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
             <!-- Logo/Title -->
             <div class="p-4 border-b border-gray-200 flex items-center justify-center">
-                <svg class="w-8 h-8 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
-                    </path>
-                </svg>
-                <h1 class="text-xl font-bold text-gray-900 ml-3 sidebar-title">Business Manager</h1>
+                <img src="{{ asset('auto-style.png') }}" alt="Auto Style" class="w-10 h-10 flex-shrink-0">
+                <h1 class="text-xl font-bold text-gray-700 ml-3 sidebar-title">AUTO STYLE</h1>
             </div>
 
             <!-- Navigation -->
@@ -85,7 +139,7 @@
                 @endif
 
                 @if(auth()->user()->hasPageAccess('products.index'))
-                    <x-nav-button label="Product List" route="/products" :active="request()->is('products')">
+                    <x-nav-button label="Liste des produits" route="/products" :active="request()->is('products')">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
@@ -94,7 +148,7 @@
                 @endif
 
                 @if(auth()->user()->hasPageAccess('stock.index'))
-                    <x-nav-button label="Stock Management" route="/stock" :active="request()->is('stock')">
+                    <x-nav-button label="Gestion du stock" route="/stock" :active="request()->is('stock')">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
@@ -103,7 +157,7 @@
                 @endif
 
                 @if(auth()->user()->hasPageAccess('stock.movements'))
-                    <x-nav-button label="Stock Movements" route="/stock/movements"
+                    <x-nav-button label="Mouvements du stock" route="/stock/movements"
                         :active="request()->is('stock/movements')">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -127,6 +181,16 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                    </x-nav-button>
+                @endif
+
+                @if(auth()->user()->hasPageAccess('retours.index'))
+                    <x-nav-button label="Retours" route="/retours" :active="request()->is('retours')">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6">
                             </path>
                         </svg>
                     </x-nav-button>
@@ -181,6 +245,7 @@
                         'stock.movements',
                         'facturation.index',
                         'ventes.index',
+                        'retours.index',
                         'clients.index',
                         'employees.index',
                         'charges.index',
@@ -222,10 +287,62 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 ml-20 transition-all duration-300">
+        <main class="flex-1 ml-0 md:ml-20 pt-16 md:pt-0 transition-all duration-300">
             @yield('content')
         </main>
     </div>
+
+    <!-- Mobile Menu JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            const menuBtn = document.getElementById('mobile-menu-btn');
+            const closeBtn = document.getElementById('mobile-close-btn');
+
+            function openMenu() {
+                sidebar.classList.add('open');
+                overlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeMenu() {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+
+            if (menuBtn) {
+                menuBtn.addEventListener('click', openMenu);
+            }
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeMenu);
+            }
+
+            if (overlay) {
+                overlay.addEventListener('click', closeMenu);
+            }
+
+            // Close menu on navigation link click (for mobile)
+            const navLinks = sidebar.querySelectorAll('a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 768) {
+                        closeMenu();
+                    }
+                });
+            });
+
+            // Close menu on escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeMenu();
+                }
+            });
+        });
+    </script>
+    @yield('scripts')
 </body>
 
 </html>
