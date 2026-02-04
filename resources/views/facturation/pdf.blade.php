@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Facture #{{ $invoice->invoice_number }}</title>
     <style>
         body {
-            font-family: 'Helvetica', sans-serif;
+            font-family: 'DejaVu Sans', sans-serif;
             font-size: 14px;
             color: #333;
             line-height: 1.5;
@@ -87,24 +87,32 @@
 <body>
     <div class="header clearfix">
         <div class="company-info">
-            <h1 style="margin: 0; color: #333;">Business Manager</h1>
-            <p>123 Business Street<br>Casablanca, Morocco<br>+212 600 000 000</p>
+            <h1 style="margin: 0; color: #333;">AUTO STYLE</h1>
+            <p><strong>Tel:</strong> +212 05 29 44 98 53</p>
         </div>
         <div class="invoice-info">
             <h2 style="margin: 0; color: #555;">FACTURE</h2>
             <p><strong>N°:</strong> {{ $invoice->invoice_number }}<br>
             <strong>Date:</strong> {{ $invoice->invoice_date->format('d/m/Y') }}<br>
-            <strong>Statut:</strong> {{ $invoice->status }}</p>
+            <strong>Statut:</strong> {{ $invoice->status === 'Finalized' ? 'Finalisée' : ($invoice->status === 'Cancelled' ? 'Annulée' : ($invoice->status === 'Draft' ? 'Brouillon' : $invoice->status)) }}</p>
         </div>
     </div>
 
     <div class="client-info">
         <h3 style="margin-top: 0; margin-bottom: 10px;">Facturé à:</h3>
-        <strong>{{ $invoice->client->name }} {{ $invoice->client->prenom }}</strong><br>
+        <strong>
+            {{ ucfirst(strtolower($invoice->client->name)) }}
+            {{ ucfirst(strtolower($invoice->client->prenom)) }}
+        </strong><br>
         @if($invoice->client->phone) Tél: {{ $invoice->client->phone }}<br> @endif
-        @if($invoice->client->car_brand) Voiture: {{ $invoice->client->car_brand }} @endif
-        @if($invoice->client->matricule) ({{ $invoice->client->matricule }}) @endif
+        @if($invoice->vehicle)
+            <strong>Véhicule:</strong> {{ $invoice->vehicle->marque }} {{ $invoice->vehicle->modele }} (<span dir="ltr" style="unicode-bidi: bidi-override;">{{ $invoice->vehicle->plaque }}</span>)<br>
+            @if($invoice->kilometrage)
+                <strong>Kilométrage:</strong> {{ number_format($invoice->kilometrage) }} km
+            @endif
+        @endif
     </div>
+
 
     <table class="table">
         <thead>
@@ -120,7 +128,7 @@
             @foreach($invoice->items as $item)
             <tr>
                 <td>
-                    <b>{{ $item->product->name }}</b>
+                    <b>{{ ucfirst($item->product->name) }}</b>
                     <br><small style="color: #777;">{{ $item->product->type }}</small>
                 </td>
                 <td class="text-left">{{ $item->quantity }}</td>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="light">
 
 <head>
     <meta charset="UTF-8">
@@ -11,6 +11,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ asset('auto-style.png') }}">
+    <script>
+        // Apply saved theme before page renders to prevent flash
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.classList.remove('light');
+            }
+        })();
+    </script>
     <style>
         /* Desktop Sidebar collapse/expand styles */
         @media (min-width: 768px) {
@@ -92,17 +102,17 @@
     </style>
 </head>
 
-<body class="bg-gray-50">
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
     <!-- Mobile Header -->
-    <header class="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40 px-4 py-3 flex items-center justify-between">
-        <button id="mobile-menu-btn" class="p-2 rounded-lg text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+    <header class="md:hidden fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-40 px-4 py-3 flex items-center justify-between">
+        <button id="mobile-menu-btn" class="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
         </button>
         <div class="flex items-center gap-2">
             <img src="{{ asset('auto-style.png') }}" alt="Auto Style" class="w-8 h-8">
-            <span class="font-bold text-gray-700">AUTO STYLE</span>
+            <span class="font-bold text-gray-700 dark:text-gray-200">AUTO STYLE</span>
         </div>
         <div class="w-10"></div> <!-- Spacer for centering -->
     </header>
@@ -112,18 +122,18 @@
 
     <div class="flex min-h-screen">
         <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar bg-white border-r border-gray-200 flex flex-col fixed h-full z-40 md:z-30">
+        <aside id="sidebar" class="sidebar bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col fixed h-full z-40 md:z-30 transition-colors duration-200">
             <!-- Close button for mobile -->
-            <button id="mobile-close-btn" class="md:hidden absolute top-4 right-4 p-2 rounded-lg text-gray-600 hover:bg-gray-100">
+            <button id="mobile-close-btn" class="md:hidden absolute top-4 right-4 p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
 
             <!-- Logo/Title -->
-            <div class="p-4 border-b border-gray-200 flex items-center justify-center">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-center">
                 <img src="{{ asset('auto-style.png') }}" alt="Auto Style" class="w-10 h-10 flex-shrink-0">
-                <h1 class="text-xl font-bold text-gray-700 ml-3 sidebar-title">AUTO STYLE</h1>
+                <h1 class="text-xl font-bold text-gray-700 dark:text-gray-200 ml-3 sidebar-title">AUTO STYLE</h1>
             </div>
 
             <!-- Navigation -->
@@ -139,7 +149,7 @@
                 @endif
 
                 @if(auth()->user()->hasPageAccess('products.index'))
-                    <x-nav-button label="Liste des produits" route="/products" :active="request()->is('products')">
+                    <x-nav-button label="Liste produits - services" route="/products" :active="request()->is('products')">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
@@ -166,8 +176,19 @@
                     </x-nav-button>
                 @endif
 
-                @if(auth()->user()->hasPageAccess('facturation.index'))
-                    <x-nav-button label="Facturation" route="/facturation" :active="request()->is('facturation')">
+
+                @if(auth()->user()->hasPageAccess('facturation.services.index'))
+                    <x-nav-button label="Facturation Services" route="/facturation/services" :active="request()->is('facturation/services')">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                    </x-nav-button>
+                @endif
+
+                @if(auth()->user()->hasPageAccess('facturation.produits.index'))
+                    <x-nav-button label="Facturation Produits" route="/facturation/produits" :active="request()->is('facturation/produits')">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
@@ -175,6 +196,7 @@
                         </svg>
                     </x-nav-button>
                 @endif
+
 
                 @if(auth()->user()->hasPageAccess('ventes.index'))
                     <x-nav-button label="Ventes" route="/ventes" :active="request()->is('ventes')">
@@ -237,43 +259,99 @@
                 @endif
 
                 <!-- Dynamic Pages -->
-                @php
-                    $excludedRoutes = [
-                        'dashboard',
-                        'products.index',
-                        'stock.index',
-                        'stock.movements',
-                        'facturation.index',
-                        'ventes.index',
-                        'retours.index',
-                        'clients.index',
-                        'employees.index',
-                        'charges.index',
-                        'users.index',
-                        'products.create',
-                        'dashboard.total_sales'
-                    ];
-                @endphp
+                @if(auth()->check())
+                    @php
+                        $excludedRoutes = [
+                            'dashboard',
+                            'products.index',
+                            'products.create',
+                            'products.edit',
+                            'products.destroy',
+                            'products.export',
+                            'products.show_cost',
+                            'products.store',
+                            'products.update',
+                            'stock.index',
+                            'stock.movements',
+                            'stock.store',
+                            'stock.store-bulk',
+                            'facturation.services.index',
+                            'facturation.services.store',
+                            'facturation.produits.index',
+                            'facturation.produits.store',
+                            'ventes.index',
+                            'ventes.cancel',
+                            'ventes.return',
+                            'retours.index',
+                            'clients.index',
+                            'clients.store',
+                            'clients.update',
+                            'clients.destroy',
+                            'employees.index',
+                            'employees.store',
+                            'employees.update',
+                            'employees.destroy',
+                            'charges.index',
+                            'charges.store',
+                            'users.index',
+                            'users.edit',
+                            'users.store',
+                            'users.update',
+                            'users.destroy',
+                            'pages.store',
+                            'pages.update',
+                            'pages.destroy',
+                            'dashboard.total_sales',
+                            'vehicles.store',
+                            'vehicles.update',
+                            'vehicles.destroy',
+                            'vehicles.history',
+                            'vehicles.search',
+                        ];
+                    @endphp
 
-                @foreach(auth()->user()->pages as $page)
-                    @if(!in_array($page->route, $excludedRoutes) && Route::has($page->route))
-                        <x-nav-button :label="$page->name" :route="route($page->route)"
-                            :active="request()->routeIs($page->route)">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </x-nav-button>
-                    @endif
-                @endforeach
+                    @foreach(auth()->user()->pages as $page)
+                        @if(!in_array($page->route, $excludedRoutes) && Route::has($page->route))
+                            <x-nav-button :label="$page->name" :route="route($page->route)"
+                                :active="request()->routeIs($page->route)">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </x-nav-button>
+                        @endif
+                    @endforeach
+                @endif
             </nav>
 
             <!-- Logout Button -->
-            <div class="p-2 border-t border-gray-200">
+            <div class="p-2 border-t border-gray-200 dark:border-gray-700">
+                <!-- Dark Mode Toggle -->
+                <button id="theme-toggle"
+                    class="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-medium mb-1"
+                    title="Toggle Dark Mode">
+                    <!-- Sun icon (shown in dark mode) -->
+                    <svg id="theme-icon-light" class="w-5 h-5 flex-shrink-0 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z">
+                        </path>
+                    </svg>
+                    <!-- Moon icon (shown in light mode) -->
+                    <svg id="theme-icon-dark" class="w-5 h-5 flex-shrink-0 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z">
+                        </path>
+                    </svg>
+                    <span class="logout-text whitespace-nowrap">
+                        <span class="dark:hidden">Mode Sombre</span>
+                        <span class="hidden dark:inline">Mode Clair</span>
+                    </span>
+                </button>
+
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit"
-                        class="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-gray-700 hover:bg-red-50 hover:text-red-600 transition-all font-medium"
+                        class="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition-all font-medium"
                         title="Logout">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -340,6 +418,23 @@
                     closeMenu();
                 }
             });
+
+            // Dark Mode Toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    const html = document.documentElement;
+                    if (html.classList.contains('dark')) {
+                        html.classList.remove('dark');
+                        html.classList.add('light');
+                        localStorage.setItem('theme', 'light');
+                    } else {
+                        html.classList.add('dark');
+                        html.classList.remove('light');
+                        localStorage.setItem('theme', 'dark');
+                    }
+                });
+            }
         });
     </script>
     @yield('scripts')

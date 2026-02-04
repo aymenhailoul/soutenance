@@ -65,11 +65,19 @@ class StockController extends Controller
         }
 
         DB::transaction(function () use ($validated) {
+            // Get product for prix_achat (used for Entrée charges tracking)
+            $product = Product::find($validated['product_id']);
+            
+            // Calculate montant (quantity * prix_achat)
+            $montant = $validated['quantity'] * ($product->prix_achat ?? 0);
+            
             // Create stock movement
             StockMovement::create([
                 'product_id' => $validated['product_id'],
                 'movement' => $validated['movement'],
                 'quantity' => $validated['quantity'],
+                'prix_achat' => $validated['movement'] === 'Entrée' ? $product->prix_achat : null,
+                'montant' => $montant,
                 'user_id' => auth()->user()->id,
                 'comment' => $validated['comment'] ?? null,
                 'created_at' => now(),
@@ -99,6 +107,88 @@ class StockController extends Controller
         });
 
         return redirect()->route('stock.index')->with('success', 'Mouvement de stock enregistré avec succès.');
+    }
+
+    public function storeBulk(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'movement' => ['required', 'in:Entrée,Sortie'],
+            'items' => ['required', 'array', 'min:1'],
+            'items.*.product_id' => ['required', 'exists:products,id'],
+            'items.*.quantity' => ['required', 'integer', 'min:1'],
+            'comment' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        // Require comment for Sortie
+        if ($validated['movement'] === 'Sortie' && empty($validated['comment'])) {
+            return back()->withErrors(['comment' => 'Le motif est requis pour les sorties.']);
+        }
+
+        // Pre-check stock availability for Sortie operations
+        if ($validated['movement'] === 'Sortie') {
+            foreach ($validated['items'] as $item) {
+                $stock = DB::table('stock')
+                    ->where('product_id', $item['product_id'])
+                    ->first();
+
+                $product = Product::find($item['product_id']);
+
+                if (!$stock) {
+                    return back()->with('error', 'Cannot perform stock removal: "' . $product->name . '" has no stock available.');
+                }
+
+                if ($stock->quantity < $item['quantity']) {
+                    return back()->with('error', 'Insufficient stock for "' . $product->name . '". Available: ' . $stock->quantity . ', Requested: ' . $item['quantity'] . '.');
+                }
+            }
+        }
+
+        DB::transaction(function () use ($validated) {
+            foreach ($validated['items'] as $item) {
+                // Get product for prix_achat
+                $product = Product::find($item['product_id']);
+
+                // Calculate montant (quantity * prix_achat)
+                $montant = $item['quantity'] * ($product->prix_achat ?? 0);
+
+                // Create stock movement
+                StockMovement::create([
+                    'product_id' => $item['product_id'],
+                    'movement' => $validated['movement'],
+                    'quantity' => $item['quantity'],
+                    'prix_achat' => $validated['movement'] === 'Entrée' ? $product->prix_achat : null,
+                    'montant' => $montant,
+                    'user_id' => auth()->user()->id,
+                    'comment' => $validated['comment'] ?? null,
+                    'created_at' => now(),
+                ]);
+
+                // Update stock quantity
+                $stock = DB::table('stock')
+                    ->where('product_id', $item['product_id'])
+                    ->first();
+
+                if ($stock) {
+                    $newQuantity = $validated['movement'] === 'Entrée'
+                        ? $stock->quantity + $item['quantity']
+                        : $stock->quantity - $item['quantity'];
+
+                    DB::table('stock')
+                        ->where('product_id', $item['product_id'])
+                        ->update(['quantity' => $newQuantity]);
+                } else {
+                    // Create stock entry if it doesn't exist (only for Entrée)
+                    DB::table('stock')->insert([
+                        'product_id' => $item['product_id'],
+                        'quantity' => $item['quantity'],
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        });
+
+        $count = count($validated['items']);
+        return redirect()->route('stock.index')->with('success', $count . ' mouvement(s) de stock enregistré(s) avec succès.');
     }
 
     public function movements(Request $request): View

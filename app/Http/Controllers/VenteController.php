@@ -44,7 +44,20 @@ class VenteController extends Controller
 
     public function show(Invoice $invoice)
     {
-        $invoice->load(['client', 'items.product', 'creditNotes']);
+        $invoice->load(['client', 'items.product', 'creditNotes.items']);
+
+        // Calculate returned quantity for each invoice item
+        $invoice->items->each(function ($item) use ($invoice) {
+            $returnedQty = 0;
+            foreach ($invoice->creditNotes as $creditNote) {
+                foreach ($creditNote->items as $cnItem) {
+                    if ($cnItem->invoice_item_id === $item->id) {
+                        $returnedQty += $cnItem->quantity;
+                    }
+                }
+            }
+            $item->returned_quantity = $returnedQty;
+        });
 
         return response()->json([
             'invoice' => $invoice,

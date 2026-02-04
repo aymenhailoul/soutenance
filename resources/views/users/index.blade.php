@@ -5,18 +5,18 @@
 @section('content')
     <div class="p-8">
         <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">Users & Pages Management</h1>
-            <p class="text-gray-600 mt-1">Manage users and their page permissions.</p>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Users & Pages Management</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-1">Manage users and their page permissions.</p>
         </div>
 
         @if (session('success'))
-            <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-800">
+            <div class="mb-6 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30 px-4 py-3 text-green-800 dark:text-green-200">
                 {{ session('success') }}
             </div>
         @endif
 
         @if ($errors->any())
-            <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-800">
+            <div class="mb-6 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-4 py-3 text-red-800 dark:text-red-200">
                 <ul class="list-disc pl-5 space-y-1">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -29,13 +29,13 @@
             <!-- Left Column: User Management -->
             <div class="lg:col-span-2 space-y-8">
                 <!-- Create User -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Create New User</h2>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Create New User</h2>
                     <form method="POST" action="{{ route('users.store') }}" class="space-y-4">
                         @csrf
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2" for="name">
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2" for="name">
                                 Name <span class="text-red-600">*</span>
                             </label>
                             <input
@@ -43,13 +43,13 @@
                                 name="name"
                                 value="{{ old('name') }}"
                                 placeholder="Enter username"
-                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2" for="password">
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2" for="password">
                                 Password <span class="text-red-600">*</span>
                             </label>
                             <input
@@ -57,29 +57,29 @@
                                 type="password"
                                 name="password"
                                 placeholder="Enter password"
-                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
                                 Page Permissions
                             </label>
-                            <div class="border border-gray-300 rounded-lg p-4 max-h-48 overflow-y-auto space-y-2">
+                            <div class="border border-gray-300 dark:border-gray-600 rounded-lg p-4 max-h-48 overflow-y-auto space-y-2 dark:bg-gray-700">
                                 @forelse ($pages as $page)
                                     <label class="flex items-center">
                                         <input
                                             type="checkbox"
                                             name="pages[]"
                                             value="{{ $page->id }}"
-                                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-600"
                                             {{ in_array($page->id, old('pages', [])) ? 'checked' : '' }}
                                         />
-                                        <span class="ml-2 text-sm text-gray-700">{{ $page->name }} <span class="text-gray-500">({{ $page->route }})</span></span>
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $page->name }} <span class="text-gray-500 dark:text-gray-400">({{ $page->route }})</span></span>
                                     </label>
                                 @empty
-                                    <p class="text-sm text-gray-500">No pages available. Create pages first.</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">No pages available. Create pages first.</p>
                                 @endforelse
                             </div>
                         </div>
@@ -91,34 +91,34 @@
                 </div>
 
                 <!-- Users List -->
-                <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">User List</h2>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">User List</h2>
                     </div>
 
                     <div class="overflow-x-auto">
                         <table class="min-w-full">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
-                                    <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Name</th>
-                                    <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Pages</th>
-                                    <th class="text-right px-6 py-3 text-sm font-semibold text-gray-700">Actions</th>
+                                    <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Name</th>
+                                    <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Pages</th>
+                                    <th class="text-right px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
+                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                 @forelse ($users as $user)
-                                    <tr class="hover:bg-gray-50">
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td class="px-6 py-4">
-                                            <div class="font-medium text-gray-900">{{ $user->name }}</div>
+                                            <div class="font-medium text-gray-900 dark:text-gray-100">{{ $user->name }}</div>
                                         </td>
-                                        <td class="px-6 py-4 text-gray-700">
+                                        <td class="px-6 py-4 text-gray-700 dark:text-gray-300">
                                             <div class="flex flex-wrap gap-1">
                                                 @forelse ($user->pages as $page)
-                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300">
                                                         {{ $page->name }}
                                                     </span>
                                                 @empty
-                                                    <span class="text-sm text-gray-500">No permissions</span>
+                                                    <span class="text-sm text-gray-500 dark:text-gray-400">No permissions</span>
                                                 @endforelse
                                             </div>
                                         </td>
@@ -141,12 +141,12 @@
                                                     id="edit-user-{{ $user->id }}"
                                                     class="hidden fixed inset-0 z-40 flex items-center justify-center bg-black/30"
                                                 >
-                                                    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-                                                        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                                                            <h2 class="text-lg font-semibold text-gray-900">Update User</h2>
+                                                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+                                                        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                                                            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Update User</h2>
                                                             <button
                                                                 type="button"
-                                                                class="text-gray-400 hover:text-gray-600"
+                                                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                                                                 onclick="document.getElementById('edit-user-{{ $user->id }}').classList.add('hidden')"
                                                             >
                                                                 ✕
@@ -159,42 +159,42 @@
                                                                 @method('PUT')
 
                                                                 <div>
-                                                                    <label class="block text-sm font-semibold text-gray-900 mb-2">Name</label>
+                                                                    <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Name</label>
                                                                     <input
                                                                         name="name"
                                                                         value="{{ $user->name }}"
-                                                                        class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                                                                         required
                                                                     />
                                                                 </div>
 
                                                                 <div>
-                                                                    <label class="block text-sm font-semibold text-gray-900 mb-2">
-                                                                        Password <span class="text-gray-500 text-xs">(leave empty to keep current)</span>
+                                                                    <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                                                                        Password <span class="text-gray-500 dark:text-gray-400 text-xs">(leave empty to keep current)</span>
                                                                     </label>
                                                                     <input
                                                                         type="password"
                                                                         name="password"
                                                                         placeholder="Enter new password"
-                                                                        class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                                                        class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
                                                                     />
                                                                 </div>
 
                                                                 <div>
-                                                                    <label class="block text-sm font-semibold text-gray-900 mb-2">
+                                                                    <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
                                                                         Page Permissions
                                                                     </label>
-                                                                    <div class="border border-gray-300 rounded-lg p-4 max-h-48 overflow-y-auto space-y-2">
+                                                                    <div class="border border-gray-300 dark:border-gray-600 rounded-lg p-4 max-h-48 overflow-y-auto space-y-2 dark:bg-gray-700">
                                                                         @foreach ($pages as $page)
                                                                             <label class="flex items-center">
                                                                                 <input
                                                                                     type="checkbox"
                                                                                     name="pages[]"
                                                                                     value="{{ $page->id }}"
-                                                                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                                                    class="rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 dark:bg-gray-600"
                                                                                     {{ $user->pages->contains($page->id) ? 'checked' : '' }}
                                                                                 />
-                                                                                <span class="ml-2 text-sm text-gray-700">{{ $page->name }} <span class="text-gray-500">({{ $page->route }})</span></span>
+                                                                                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $page->name }} <span class="text-gray-500 dark:text-gray-400">({{ $page->route }})</span></span>
                                                                             </label>
                                                                         @endforeach
                                                                     </div>
@@ -233,7 +233,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="px-6 py-10 text-center text-gray-600">
+                                        <td colspan="3" class="px-6 py-10 text-center text-gray-600 dark:text-gray-400">
                                             No users found.
                                         </td>
                                     </tr>
@@ -247,13 +247,13 @@
             <!-- Right Column: Page Management -->
             <div class="space-y-8">
                 <!-- Add Page Form -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Add Page</h2>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Add Page</h2>
                     <form method="POST" action="{{ route('pages.store') }}" class="space-y-4">
                         @csrf
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2" for="page_name">
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2" for="page_name">
                                 Page Name <span class="text-red-600">*</span>
                             </label>
                             <input
@@ -261,13 +261,13 @@
                                 name="name"
                                 value="{{ old('name') }}"
                                 placeholder="e.g., Dashboard"
-                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2" for="page_route">
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2" for="page_route">
                                 Route <span class="text-red-600">*</span>
                             </label>
                             <input
@@ -275,7 +275,7 @@
                                 name="route"
                                 value="{{ old('route') }}"
                                 placeholder="e.g., dashboard"
-                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
                                 required
                             />
                         </div>
@@ -287,17 +287,17 @@
                 </div>
 
                 <!-- Pages List -->
-                <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Available Pages</h2>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Available Pages</h2>
                     </div>
 
-                    <div class="divide-y divide-gray-200">
+                    <div class="divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse ($pages as $page)
-                            <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50">
+                            <div class="px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700">
                                 <div>
-                                    <div class="font-medium text-gray-900">{{ $page->name }}</div>
-                                    <div class="text-sm text-gray-500">{{ $page->route }}</div>
+                                    <div class="font-medium text-gray-900 dark:text-gray-100">{{ $page->name }}</div>
+                                    <div class="text-sm text-gray-500 dark:text-gray-400">{{ $page->route }}</div>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <x-icon-button
@@ -316,12 +316,12 @@
                                         id="edit-page-{{ $page->id }}"
                                         class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/30"
                                     >
-                                        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
-                                            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                                                <h2 class="text-lg font-semibold text-gray-900">Edit Page</h2>
+                                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg mx-4">
+                                            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                                                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Edit Page</h2>
                                                 <button
                                                     type="button"
-                                                    class="text-gray-400 hover:text-gray-600"
+                                                    class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                                                     onclick="document.getElementById('edit-page-{{ $page->id }}').classList.add('hidden')"
                                                 >
                                                     ✕
@@ -334,25 +334,25 @@
                                                     @method('PUT')
 
                                                     <div>
-                                                        <label class="block text-sm font-semibold text-gray-900 mb-2">
+                                                        <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
                                                             Page Name <span class="text-red-600">*</span>
                                                         </label>
                                                         <input
                                                             name="name"
                                                             value="{{ $page->name }}"
-                                                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                                                             required
                                                         />
                                                     </div>
 
                                                     <div>
-                                                        <label class="block text-sm font-semibold text-gray-900 mb-2">
+                                                        <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
                                                             Route <span class="text-red-600">*</span>
                                                         </label>
                                                         <input
                                                             name="route"
                                                             value="{{ $page->route }}"
-                                                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                                                             required
                                                         />
                                                     </div>
@@ -385,7 +385,7 @@
                                 </div>
                             </div>
                         @empty
-                            <div class="px-6 py-10 text-center text-gray-600">
+                            <div class="px-6 py-10 text-center text-gray-600 dark:text-gray-400">
                                 No pages found. Add a page to get started.
                             </div>
                         @endforelse

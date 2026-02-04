@@ -40,9 +40,11 @@ class ChargesExport implements FromCollection, WithHeadings
             ->whereBetween('created_at', [$dateFromParsed, $dateToParsed])
             ->get()
             ->map(function ($movement) {
+                // Use stored prix_achat if available, fallback to current product price for old entries
+                $prixAchat = $movement->prix_achat ?? $movement->product->prix_achat;
                 return [
                     'Type' => 'Entrée',
-                    'Montant' => $movement->product->prix_achat * $movement->quantity,
+                    'Montant' => $prixAchat * $movement->quantity,
                     'Motif' => 'Entrée - ' . $movement->product->name . ' (x' . $movement->quantity . ')',
                     'Date' => $movement->created_at->format('Y-m-d H:i'),
                 ];

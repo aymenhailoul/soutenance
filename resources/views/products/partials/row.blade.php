@@ -1,18 +1,18 @@
-<tr id="product-row-{{ $product->id }}" class="hover:bg-gray-50">
+<tr id="product-row-{{ $product->id }}" class="hover:bg-gray-50 dark:hover:bg-gray-700">
     <td class="px-6 py-4">
-        <div class="font-medium text-gray-900">{{ $product->name }}</div>
+        <div class="font-medium text-gray-900 dark:text-gray-100 capitalize">{{ $product->name }}</div>
     </td>
 
-    <td class="px-6 py-4 text-gray-700">{{ $product->type }}</td>
+    <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ $product->type }}</td>
     @if(auth()->user()->hasPageAccess('products.show_cost'))
-        <td class="px-6 py-4 text-gray-700">{{ $product->prix_achat ?? '-' }}</td>
+        <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ $product->prix_achat ?? '-' }}</td>
     @endif
-    <td class="px-6 py-4 text-gray-700">{{ $product->prix_vente ?? '-' }}</td>
-    <td class="px-6 py-4 text-gray-700">{{ $product->serial_code ?? '-' }}</td>
-    <td class="px-6 py-4 text-gray-700"> {{ $product->created_at->format('Y-m-d') }} </td>
-    <td class="px-6 py-4 text-gray-700">
+    <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ $product->prix_vente ?? '-' }}</td>
+    <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ $product->serial_code ?? '-' }}</td>
+    <td class="px-6 py-4 text-gray-700 dark:text-gray-300"> {{ $product->created_at->format('Y-m-d') }} </td>
+    <td class="px-6 py-4 text-gray-700 dark:text-gray-300">
         @if($product->type === 'Produit')
-            <span class="{{ $product->stock > 0 ? 'text-green-600' : 'text-red-600' }} font-medium">
+            <span class="{{ $product->stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' }} font-medium">
                 {{ $product->stock }}
             </span>
         @else
@@ -20,12 +20,12 @@
         @endif
     </td>
 
-    @if(auth()->user()->hasPageAccess('products.create'))
+    @if(auth()->user()->hasPageAccess('products.create') || auth()->user()->hasPageAccess('products.edit') || auth()->user()->hasPageAccess('products.destroy'))
         <td class="px-6 py-4">
             <div class="flex items-center justify-end gap-2">
                 <!-- Edit button -->
                 @if(auth()->user()->hasPageAccess('products.edit'))
-                    <a href="{{ route('products.edit', $product) }}" title="Edit" class="inline-flex items-center justify-center w-9 h-9 rounded-lg
+                    <a href="{{ route('products.edit', ['product' => $product->id]) }}" title="Edit" class="inline-flex items-center justify-center w-9 h-9 rounded-lg
                                 text-blue-600 hover:bg-blue-50
                                 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,7 +39,7 @@
 
                 <!-- Delete button -->
                 @if(auth()->user()->hasPageAccess('products.destroy'))
-                    <form method="POST" action="{{ route('products.destroy', $product) }}"
+                    <form method="POST" action="{{ route('products.destroy', ['product' => $product->id]) }}"
                         onsubmit="return confirm('Delete this product?')">
                         @csrf
                         @method('DELETE')

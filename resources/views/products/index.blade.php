@@ -1,22 +1,28 @@
 @extends('layouts.app')
 
-@section('title', 'Products')
+@section('title', 'Liste des produits')
 
 @section('content')
     <div class="p-8">
         <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">Produits et Services</h1>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Produits et Services</h1>
         </div>
 
         {{-- Success / Errors (same style as clients page) --}}
         @if (session('success'))
-            <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-800">
+            <div class="mb-6 rounded-lg border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30 px-4 py-3 text-green-800 dark:text-green-200">
                 {{ session('success') }}
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="mb-6 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-4 py-3 text-red-800 dark:text-red-200">
+                {{ session('error') }}
+            </div>
+        @endif
+
         @if ($errors->any())
-            <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-800">
+            <div class="mb-6 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-4 py-3 text-red-800 dark:text-red-200">
                 <ul class="list-disc pl-5 space-y-1">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -26,14 +32,15 @@
         @endif
 
         <!-- Products List Card -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200 flex flex-col gap-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col gap-4">
                 <div class="flex items-center justify-between gap-4">
-                    <h2 class="text-lg font-semibold text-gray-900">Liste des produits et services</h2>
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Liste des produits et services</h2>
 
                     <div class="flex items-center gap-3">
 
                         <!-- Export button -->
+                        @if(auth()->user()->hasPageAccess('products.export'))
                         <x-button variant="success" :href="route('products.export', ['format' => 'xlsx'] + request()->query())">
                             <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -42,12 +49,13 @@
                             </svg>
                             Exporter Excel
                         </x-button>
+                        @endif
 
                         <!-- Add Product-->
                         @if(auth()->user()->hasPageAccess('products.create'))
                             <x-button variant="primary" type="button"
                                 onclick="document.getElementById('add-product-modal').classList.remove('hidden')">
-                                Ajouter Produit
+                                Ajouter Produit ou Service
                             </x-button>
                         @endif
 
@@ -57,18 +65,18 @@
                 <!-- Product Search Dropdown -->
                 <div class="flex items-center gap-3">
                     <div class="relative flex-1 max-w-md">
-                        <label class="block text-sm font-semibold text-gray-900 mb-2" for="product-search">
+                        <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2" for="product-search">
                             Rechercher produit ou service
                         </label>
                         <div class="relative">
                             <input type="text" id="product-search" autocomplete="off"
                                 placeholder="Taper nom ou code produit"
-                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
                                 value="{{ request('product_id') ? $allProducts->firstWhere('id', request('product_id'))?->name : '' }}"
                                 oninput="searchProducts(this.value)" onfocus="showProductDropdown()"
                                 onblur="setTimeout(() => hideProductDropdown(), 200)" />
                             <div id="product-dropdown"
-                                class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                 <!-- Products will be populated here -->
                             </div>
                         </div>
@@ -76,7 +84,7 @@
                     @if(request('product_id'))
                         <div class="mt-6">
                             <a href="{{ route('products.index') }}"
-                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M6 18L18 6M6 6l12 12"></path>
@@ -90,29 +98,29 @@
 
             <div class="overflow-x-auto">
                 <table class="min-w-full">
-                    <thead class="bg-gray-50">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
-                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Nom</th>
-                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Type</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Nom</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Type</th>
                             @if(auth()->user()->hasPageAccess('products.show_cost'))
-                                <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Prix Achat</th>
+                                <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Prix Achat</th>
                             @endif
-                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Prix Vente</th>
-                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Code</th>
-                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Créé le</th>
-                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700">Stock</th>
-                            @if(auth()->user()->hasPageAccess('products.create'))
-                                <th class="text-right px-12 py-3 text-sm font-semibold text-gray-700">Actions</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Prix Vente</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Code</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Créé le</th>
+                            <th class="text-left px-6 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Stock</th>
+                            @if(auth()->user()->hasPageAccess('products.create') || auth()->user()->hasPageAccess('products.edit') || auth()->user()->hasPageAccess('products.destroy'))
+                                <th class="text-right px-12 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Actions</th>
                             @endif
                         </tr>
                     </thead>
 
-                    <tbody id="products-table-body" class="divide-y divide-gray-200">
+                    <tbody id="products-table-body" class="divide-y divide-gray-200 dark:divide-gray-700">
                         @forelse ($products as $product)
                             @include('products.partials.row', ['product' => $product])
                         @empty
                             <tr>
-                                <td colspan="8" class="px-6 py-10 text-center text-gray-600">
+                                <td colspan="8" class="px-6 py-10 text-center text-gray-600 dark:text-gray-400">
                                     Aucun produit trouvé.
                                 </td>
                             </tr>
@@ -130,10 +138,10 @@
 
     <!-- Add Product Modal -->
     <div id="add-product-modal" class="hidden fixed inset-0 z-40 flex items-center justify-center bg-black/30">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-3xl mx-4">
-            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-                <h2 class="text-lg font-semibold text-gray-900">Ajouter produit</h2>
-                <button type="button" class="text-gray-400 hover:text-gray-600"
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-3xl mx-4">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Ajouter Produit ou Service</h2>
+                <button type="button" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                     onclick="document.getElementById('add-product-modal').classList.add('hidden')">
                     ✕
                 </button>
@@ -148,60 +156,60 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">Nom <span
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Nom <span
                                     class="text-red-600">*</span></label>
                             <input name="name" value="{{ old('name') }}"
-                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
                                 placeholder="Nom du produit" required />
                             @error('name')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">Type <span
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Type <span
                                     class="text-red-600">*</span></label>
                             <select id="product-type" name="type" required onchange="toggleProductTypeFields()"
-                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500">
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400">
                                 <option value="">Select</option>
                                 <option value="Produit" {{ old('type') === 'Produit' ? 'selected' : '' }}>Produit</option>
                                 <option value="Service" {{ old('type') === 'Service' ? 'selected' : '' }}>Service</option>
                             </select>
                             @error('type')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div id="prix-achat-wrapper">
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">Prix Achat</label>
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Prix Achat</label>
                             <input id="prix-achat" type="text" name="prix_achat" value="{{ old('prix_achat') }}"
-                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="0.00" required />
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
+                                placeholder="0.00" />
 
                             @error('prix_achat')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">Prix Vente<span
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Prix Vente<span
                                     class="text-red-600">*</span></label>
                             <input type="text" name="prix_vente" value="{{ old('prix_vente') }}"
-                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
                                 placeholder="0.00" required />
                             @error('prix_vente')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div id="serial-code-wrapper" class="md:col-span-2">
-                            <label class="block text-sm font-semibold text-gray-900 mb-2">Code</label>
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Code</label>
                             <input id="serial-code" name="serial_code" value="{{ old('serial_code') }}"
-                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="..."  required/>
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
+                                placeholder="..." />
 
                             @error('serial_code')
-                                <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                                <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
@@ -262,16 +270,16 @@
             currentFilteredProducts = filteredProducts;
 
             if (filteredProducts.length === 0) {
-                dropdown.innerHTML = '<div class="px-4 py-2 text-gray-500">No products found</div>';
+                dropdown.innerHTML = '<div class="px-4 py-2 text-gray-500 dark:text-gray-400">No products found</div>';
                 dropdown.classList.remove('hidden');
                 return;
             }
 
             filteredProducts.forEach((product, index) => {
                 const item = document.createElement('div');
-                item.className = 'px-4 py-2 hover:bg-blue-50 cursor-pointer dropdown-item';
+                item.className = 'px-4 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/50 cursor-pointer dropdown-item dark:text-gray-100';
                 if (index === highlightedIndex) {
-                    item.classList.add('bg-blue-100');
+                    item.classList.add('bg-blue-100', 'dark:bg-blue-900');
                 }
                 item.dataset.index = index;
                 // Show name and serial code if available
@@ -290,10 +298,10 @@
             const items = dropdown.querySelectorAll('.dropdown-item');
             items.forEach((item, index) => {
                 if (index === highlightedIndex) {
-                    item.classList.add('bg-blue-100');
+                    item.classList.add('bg-blue-100', 'dark:bg-blue-900');
                     item.scrollIntoView({ block: 'nearest' });
                 } else {
-                    item.classList.remove('bg-blue-100');
+                    item.classList.remove('bg-blue-100', 'dark:bg-blue-900');
                 }
             });
         }
@@ -357,16 +365,23 @@
             const type = document.getElementById('product-type').value;
             const prixAchatWrapper = document.getElementById('prix-achat-wrapper');
             const serialCodeWrapper = document.getElementById('serial-code-wrapper');
+            const prixAchatInput = document.getElementById('prix-achat');
+            const serialCodeInput = document.getElementById('serial-code');
 
             if (type === 'Service') {
                 prixAchatWrapper.style.display = 'none';
                 serialCodeWrapper.style.display = 'none';
-                // Clear values when hiding
-                document.getElementById('prix-achat').value = '';
-                document.getElementById('serial-code').value = '';
+                // Clear values and remove required when hiding
+                prixAchatInput.value = '';
+                serialCodeInput.value = '';
+                prixAchatInput.removeAttribute('required');
+                serialCodeInput.removeAttribute('required');
             } else {
                 prixAchatWrapper.style.display = 'block';
                 serialCodeWrapper.style.display = 'block';
+                // Add required attribute for Produit type
+                prixAchatInput.setAttribute('required', 'required');
+                serialCodeInput.setAttribute('required', 'required');
             }
         }
 

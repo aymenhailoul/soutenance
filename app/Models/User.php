@@ -75,32 +75,80 @@ class User extends Authenticatable
 
             // EXCEPTION: Products (Strict Security)
             // For products, 'index' ONLY grants view access.
-            // 'create', 'edit', 'delete' require 'products.create'.
             if ($resource === 'products') {
                 // Read-only actions allowed by index
-                $readActions = ['index', 'show', 'export'];
+                $readActions = ['index', 'show'];
                 if (in_array($action, $readActions) || str_starts_with($action, 'search')) {
                     if ($this->pages()->where('route', 'products.index')->exists()) {
                         return true;
                     }
                 }
 
-                // Write actions allowed by create
-                $writeActions = ['create', 'store', 'edit', 'update', 'destroy'];
-                if (in_array($action, $writeActions)) {
-                    if ($this->pages()->where('route', 'products.create')->exists()) {
-                        return true;
-                    }
-                    // Explicitly DENY if they don't have create permission, do not fall through to generic rule
-                    return false;
+                // Write actions
+                if (in_array($action, ['create', 'store'])) {
+                    return $this->pages()->where('route', 'products.create')->exists();
                 }
 
-                // For any other action (like show_cost) that wasn't caught above, DENY access if relying on inheritance.
-                // It must be granted explicitly via Direct Check (Step 1).
+                if (in_array($action, ['edit', 'update'])) {
+                    return $this->pages()->where('route', 'products.edit')->exists();
+                }
+
+                if ($action === 'destroy') {
+                    return $this->pages()->where('route', 'products.destroy')->exists();
+                }
+
                 return false;
             }
 
-            // GENERIC DEFAULT RULE (Clients, Employees, Facturation, etc.)
+            // EXCEPTION: Ventes (cancel and return require explicit permissions)
+            if ($resource === 'ventes') {
+                // Read-only actions allowed by index
+                $readActions = ['index', 'show', 'export'];
+                if (in_array($action, $readActions)) {
+                    if ($this->pages()->where('route', 'ventes.index')->exists()) {
+                        return true;
+                    }
+                }
+
+                // Cancel and return require explicit permissions
+                if ($action === 'cancel') {
+                    return $this->pages()->where('route', 'ventes.cancel')->exists();
+                }
+                if ($action === 'return') {
+                    return $this->pages()->where('route', 'ventes.return')->exists();
+                }
+
+                // For any other action, DENY if relying on inheritance
+                return false;
+            }
+
+            // EXCEPTION: Facturation (split into services and products)
+            // facturation.services.* routes need facturation.services.index permission
+            // facturation.produits.* routes need facturation.produits.index permission
+            if ($resource === 'facturation') {
+                // Check for services sub-routes
+                if (count($parts) >= 3 && $parts[1] === 'services') {
+                    if ($this->pages()->where('route', 'facturation.services.index')->exists()) {
+                        return true;
+                    }
+                    return false;
+                }
+                // Check for products sub-routes
+                if (count($parts) >= 3 && $parts[1] === 'produits') {
+                    if ($this->pages()->where('route', 'facturation.produits.index')->exists()) {
+                        return true;
+                    }
+                    return false;
+                }
+                // For other facturation routes (pdf, cancel), check for either permission
+                if ($this->pages()->where('route', 'facturation.services.index')->exists() ||
+                    $this->pages()->where('route', 'facturation.produits.index')->exists()) {
+                    return true;
+                }
+                return false;
+            }
+
+            // GENERIC DEFAULT RULE (Clients, Employees, etc.)
             // For these resources, having 'index' permission implies full access to all sub-actions.
             if ($this->pages()->where('route', $resource . '.index')->exists()) {
                 return true;
@@ -115,6 +163,11 @@ class User extends Authenticatable
 
         // Special case: credit-notes access is granted if user has ventes.index permission
         if (str_starts_with($route, 'credit-notes.') && $this->pages()->where('route', 'ventes.index')->exists()) {
+            return true;
+        }
+
+        // Special case: vehicles access is granted if user has clients.index permission
+        if (str_starts_with($route, 'vehicles.') && $this->pages()->where('route', 'clients.index')->exists()) {
             return true;
         }
 

@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'name',
@@ -24,6 +25,11 @@ class Product extends Model
     public function stockMovements()
     {
         return $this->hasMany(StockMovement::class);
+    }
+
+    public function invoiceItems()
+    {
+        return $this->hasMany(InvoiceItem::class);
     }
 
     // Calculate current stock from movements (Entrée - Sortie)
