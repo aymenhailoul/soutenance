@@ -11,7 +11,7 @@ class ClientController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Client::query();
+        $query = Client::with('vehicles');
 
         // Filter by specific client_id (from dropdown search)
         if ($request->filled('client_id')) {
@@ -20,8 +20,11 @@ class ClientController extends Controller
 
         $clients = $query->orderBy('name')->orderBy('prenom')->paginate(15)->withQueryString();
 
-        // Get all clients for the dropdown search
-        $allClients = Client::select('id', 'name', 'prenom', 'car_brand', 'matricule')->orderBy('name')->get();
+        // Get all clients for the dropdown search (with their vehicles)
+        $allClients = Client::with('vehicles:id,client_id,plaque,marque')
+            ->select('id', 'name', 'prenom')
+            ->orderBy('name')
+            ->get();
 
         return view('clients.index', compact('clients', 'allClients'));
     }
@@ -32,8 +35,6 @@ class ClientController extends Controller
             'name' => ['required', 'string', 'max:100'],
             'prenom' => ['required', 'string', 'max:100'],
             'phone' => ['required', 'string', 'max:20'],
-            'car_brand' => ['nullable', 'string', 'max:50'],
-            'matricule' => ['nullable', 'string', 'max:50'],
         ]);
 
         Client::create($validated);
@@ -47,8 +48,6 @@ class ClientController extends Controller
             'name' => ['required', 'string', 'max:100'],
             'prenom' => ['required', 'string', 'max:100'],
             'phone' => ['required', 'string', 'max:20'],
-            'car_brand' => ['nullable', 'string', 'max:50'],
-            'matricule' => ['nullable', 'string', 'max:50'],
         ]);
 
         $client->update($validated);
@@ -63,3 +62,4 @@ class ClientController extends Controller
         return redirect()->route('clients.index')->with('success', 'Client deleted successfully.');
     }
 }
+

@@ -1,20 +1,20 @@
 @extends('layouts.app')
 
-@section('title', 'Accueil')
+@section('title', 'Home')
 
 @section('content')
     <div class="p-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Tableau de Bord</h1>
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Tableau de Bord</h1>
 
-        <div class="bg-white rounded-lg shadow p-6 mb-8">
-            <h2 class="text-xl font-semibold mb-2 capitalize">Bonjour, {{ auth()->user()->name }}</h2>
-            <p class="text-gray-600">Voici un aperçu de vos opérations commerciales</p>
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-2 capitalize dark:text-gray-100">Bonjour, {{ auth()->user()->name }}</h2>
+            <p class="text-gray-600 dark:text-gray-400">Voici un aperçu de vos opérations commerciales</p>
         </div>
 
         <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Total Products -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -23,15 +23,15 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-gray-600 text-sm font-medium">Total Produits</p>
-                        <p class="text-3xl font-bold text-gray-900 count-up" data-target="{{ $totalProducts }}">0</p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total Produits</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-gray-100 count-up" data-target="{{ $totalProducts }}">0</p>
                     </div>
                 </div>
             </div>
 
             <!-- Total Sales -->
             @if(auth()->user()->hasPageAccess('dashboard.total_sales'))
-                <div class="bg-white rounded-lg shadow p-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                     <div class="flex items-start gap-4">
                         <div class="w-14 h-14 bg-green-500 rounded-xl flex items-center justify-center flex-shrink-0">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,15 +41,15 @@
                             </svg>
                         </div>
                         <div class="flex-1 min-w-0">
-                            <p class="text-gray-600 text-sm font-medium">Total Ventes</p>
-                            <p class="text-2xl font-bold text-gray-900 break-words count-up" data-target="{{ $totalSales }}" data-decimals="2" data-suffix=" MAD">0.00 MAD</p>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total Ventes</p>
+                            <p class="text-2xl font-bold text-gray-900 dark:text-gray-100 break-words count-up" data-target="{{ $totalSales }}" data-decimals="2" data-suffix=" MAD">0.00 MAD</p>
                         </div>
                     </div>
                 </div>
             @endif
 
             <!-- Active Clients -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,14 +59,14 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-gray-600 text-sm font-medium">Total Clients</p>
-                        <p class="text-3xl font-bold text-gray-900 count-up" data-target="{{ $totalClients }}">0</p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total Clients</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-gray-100 count-up" data-target="{{ $totalClients }}">0</p>
                     </div>
                 </div>
             </div>
 
             <!-- Total Facturations -->
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,8 +76,8 @@
                         </svg>
                     </div>
                     <div>
-                        <p class="text-gray-600 text-sm font-medium">Total Facturations</p>
-                        <p class="text-3xl font-bold text-gray-900 count-up" data-target="{{ $totalInvoices }}">0</p>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm font-medium">Total Facturations</p>
+                        <p class="text-3xl font-bold text-gray-900 dark:text-gray-100 count-up" data-target="{{ $totalInvoices }}">0</p>
                     </div>
                 </div>
             </div>

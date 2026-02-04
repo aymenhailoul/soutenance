@@ -1,11 +1,11 @@
-<tr id="employee-row-{{ $employee->id }}" class="hover:bg-gray-50">
+<tr id="employee-row-{{ $employee->id }}" class="hover:bg-gray-50 dark:hover:bg-gray-700">
     <td class="px-6 py-4">
-        <div class="font-medium text-gray-900 capitalize">{{ $employee->name }}</div>
+        <div class="font-medium text-gray-900 dark:text-gray-100 capitalize">{{ $employee->name }}</div>
     </td>
 
-    <td class="px-6 py-4 text-gray-700 uppercase">{{ $employee->cin }}</td>
-    <td class="px-6 py-4 text-gray-700">{{ number_format($employee->salary, 2) }} DH</td>
-    <td class="px-6 py-4 text-gray-700">{{ $employee->joined_at->format('Y-m-d') }}</td>
+    <td class="px-6 py-4 text-gray-700 dark:text-gray-300 uppercase">{{ $employee->cin }}</td>
+    <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ number_format($employee->salary, 2) }} DH</td>
+    <td class="px-6 py-4 text-gray-700 dark:text-gray-300">{{ $employee->joined_at->format('Y-m-d') }}</td>
 
     <td class="px-6 py-4">
     <div class="flex items-center justify-end gap-2">

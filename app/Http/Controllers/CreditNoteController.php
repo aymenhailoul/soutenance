@@ -66,6 +66,27 @@ class CreditNoteController extends Controller
             ], 400);
         }
 
+        // Check if invoice type is 'produit' and if return would be for all products
+        if ($invoice->type === 'produit') {
+            $totalInvoiceQuantity = $invoice->items->sum('quantity');
+            
+            // Get already returned quantity for this invoice
+            $alreadyReturnedQuantity = CreditNoteItem::whereHas('creditNote', function ($q) use ($invoice) {
+                $q->where('invoice_id', $invoice->id);
+            })->sum('quantity');
+
+            $currentRequestQuantity = collect($validated['items'])->sum('quantity');
+
+            if (($alreadyReturnedQuantity + $currentRequestQuantity) >= $totalInvoiceQuantity) {
+                 return response()->json([
+                    'success' => false,
+                    'message' => 'Impossible de faire un retour pour tous les produits de cette facture.'
+                ], 400);
+            }
+        }
+
+
+
         DB::beginTransaction();
         try {
             $totalAmount = 0;

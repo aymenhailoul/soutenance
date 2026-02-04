@@ -58,13 +58,22 @@ class ProductController extends Controller
             'prix_achat' => 'nullable|required_if:type,Produit|regex:/^\d+(\.\d{1,2})?$/',
             'prix_vente' => 'required|regex:/^\d+(\.\d{1,2})?$/',
             'serial_code' => 'nullable|required_if:type,Produit|integer|unique:products,serial_code',
+        ], [
+            'prix_achat.required_if' => 'veuillez renseigner ce champ',
+            'serial_code.required_if' => 'veuillez renseigner ce champ',
         ]);
+
+        // If Service → force NULL values
+        if ($data['type'] === 'Service') {
+            $data['prix_achat'] = null;
+            $data['serial_code'] = null;
+        }
 
         Product::create($data);
 
         return redirect()
             ->route('products.index')
-            ->with('success', 'Product added successfully');
+            ->with('success', 'Produit ajouté avec succès');
     }
 
     // SHOW EDIT FORM
@@ -103,11 +112,22 @@ class ProductController extends Controller
     // DELETE PRODUCT
     public function destroy(Product $product)
     {
-        $product->delete();
+        // Check if product has any linked data (Invoices or Stock Movements)
+        $hasHistory = $product->invoiceItems()->exists() || $product->stockMovements()->exists();
+
+        if ($hasHistory) {
+            // Soft Delete (Archive)
+            $product->delete();
+            $message = 'Produit supprimé';
+        } else {
+            // Force Delete (Permanent)
+            $product->forceDelete();
+            $message = 'Produit supprimé';
+        }
 
         return redirect()
             ->route('products.index')
-            ->with('success', 'Produit supprimé avec succès');
+            ->with('success', $message);
     }
 
     // EXPORT PRODUCTS (xls)

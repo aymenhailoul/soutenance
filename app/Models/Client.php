@@ -13,7 +13,21 @@ class Client extends Model
         'name',
         'prenom',
         'phone',
-        'car_brand',
-        'matricule',
     ];
+
+    /**
+     * Get all vehicles for this client.
+     */
+    public function vehicles()
+    {
+        return $this->hasMany(Vehicle::class);
+    }
+
+    /**
+     * Get all invoices for this client.
+     */
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }

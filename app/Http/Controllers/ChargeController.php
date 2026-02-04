@@ -39,10 +39,12 @@ class ChargeController extends Controller
         }
 
         $entrees = $entreesQuery->get()->map(function ($movement) {
+            // Use stored prix_achat if available, fallback to current product price for old entries
+            $prixAchat = $movement->prix_achat ?? $movement->product->prix_achat;
             return [
                 'id' => 'entree_' . $movement->id,
                 'type' => 'Entrée',
-                'amount' => $movement->product->prix_achat * $movement->quantity,
+                'amount' => $prixAchat * $movement->quantity,
                 'motif' => 'Entrée - ' . $movement->product->name . ' (x' . $movement->quantity . ')',
                 'created_at' => $movement->created_at,
             ];

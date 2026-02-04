@@ -57,12 +57,20 @@ class VentesExport implements FromCollection, WithHeadings, WithMapping
     {
         $clientFullName = trim(($invoice->client->prenom ?? '') . ' ' . ($invoice->client->name ?? 'N/A'));
 
+        // Translate status to French
+        $statusMap = [
+            'Finalized' => 'Finalisée',
+            'Cancelled' => 'Annulée',
+            'Draft' => 'Brouillon',
+        ];
+        $status = $statusMap[$invoice->status] ?? $invoice->status;
+
         return [
             $invoice->invoice_number,
             $invoice->invoice_date->format('Y-m-d'),
             $clientFullName,
             number_format($invoice->total_amount, 2, '.', ''),
-            $invoice->status ?? 'Payée',
+            $status,
         ];
     }
 }

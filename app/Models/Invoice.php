@@ -12,7 +12,10 @@ class Invoice extends Model
 
     protected $fillable = [
         'invoice_number',
+        'type',
         'client_id',
+        'vehicle_id',
+        'kilometrage',
         'invoice_date',
         'total_amount',
         'status',
@@ -30,10 +33,13 @@ class Invoice extends Model
 
         static::creating(function ($invoice) {
             if (!$invoice->invoice_number) {
-                // Generate unique invoice number: INV-YYYYMMDD-XXXXXX
-                $prefix = 'INV-' . date('Ymd') . '-';
+                // Generate unique invoice number based on type
+                // FACT-SERV-XXXXXX for services
+                // FACT-PROD-XXXXXX for products
+                $typePrefix = $invoice->type === 'service' ? 'SERV' : 'PROD';
+                $prefix = 'FACT-' . $typePrefix . '-';
                 
-                // Find the maximum numeric suffix for today's invoices
+                // Find the maximum numeric suffix for invoices of this type
                 $maxNumber = self::where('invoice_number', 'like', $prefix . '%')
                     ->get()
                     ->map(function ($inv) {
@@ -68,5 +74,10 @@ class Invoice extends Model
     public function creditNotes()
     {
         return $this->hasMany(CreditNote::class);
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class);
     }
 }

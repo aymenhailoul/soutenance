@@ -1,28 +1,28 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Product')
+@section('title', 'Modifier Produit')
 
 @section('content')
     <div class="p-8 max-w-4xl">
 
-        <h1 class="text-3xl font-bold mb-6">Edit Product</h1>
+        <h1 class="text-3xl font-bold mb-6 text-gray-900 dark:text-gray-100">Modifier Produit</h1>
 
         <form method="POST" action="{{ route('products.update', $product) }}"
-            class="bg-white shadow rounded-lg p-6 space-y-6">
+            class="bg-white dark:bg-gray-800 shadow rounded-lg p-6 space-y-6">
             @csrf
             @method('PUT')
 
             <!-- Name -->
             <div>
-                <label class="block text-sm font-medium mb-1">Name</label>
+                <label class="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">Nom</label>
                 <input type="text" name="name" value="{{ old('name', $product->name) }}"
-                    class="w-full rounded-lg border-gray-300" required>
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400" required>
             </div>
 
             <!-- Type -->
             <div>
-                <label class="block text-sm font-medium mb-1">Type</label>
-                <select name="type" id="type" class="w-full rounded-lg border-gray-300">
+                <label class="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">Type</label>
+                <select name="type" id="type" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400" onchange="toggleFields()">
                     <option value="Produit" {{ old('type', $product->type) == 'Produit' ? 'selected' : '' }}>Produit</option>
                     <option value="Service" {{ old('type', $product->type) == 'Service' ? 'selected' : '' }}>Service</option>
                 </select>
@@ -30,23 +30,23 @@
 
             <!-- Prix Achat -->
             <div id="prixAchatField">
-                <label class="block text-sm font-medium mb-1">Prix Achat</label>
-                <input type="number" step="0.01" name="prix_achat" value="{{ old('prix_achat', $product->prix_achat) }}"
-                    class="w-full rounded-lg border-gray-300" required>
+                <label class="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">Prix Achat</label>
+                <input type="number" step="0.01" name="prix_achat" id="prix_achat" value="{{ old('prix_achat', $product->prix_achat) }}"
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400">
             </div>
 
             <!-- Prix Vente -->
             <div>
-                <label class="block text-sm font-medium mb-1">Prix Vente</label>
+                <label class="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">Prix Vente</label>
                 <input type="number" step="0.01" name="prix_vente" value="{{ old('prix_vente', $product->prix_vente) }}"
-                    class="w-full rounded-lg border-gray-300" required>
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400" required>
             </div>
 
             <!-- Serial Code -->
             <div id="serialCodeField">
-                <label class="block text-sm font-medium mb-1">Serial Code</label>
-                <input type="number" name="serial_code" value="{{ old('serial_code', $product->serial_code) }}"
-                    class="w-full rounded-lg border-gray-300" required>
+                <label class="block text-sm font-medium mb-1 text-gray-900 dark:text-gray-100">Code</label>
+                <input type="number" name="serial_code" id="serial_code" value="{{ old('serial_code', $product->serial_code) }}"
+                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400">
             </div>
 
             <!-- Buttons -->
@@ -64,19 +64,31 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        function toggleFields() {
             const type = document.getElementById('type');
-            const achat = document.getElementById('prixAchatField');
-            const serial = document.getElementById('serialCodeField');
+            const achatField = document.getElementById('prixAchatField');
+            const serialField = document.getElementById('serialCodeField');
+            const achatInput = document.getElementById('prix_achat');
+            const serialInput = document.getElementById('serial_code');
 
-            function toggle() {
-                const isService = type.value === 'Service';
-                achat.style.display = isService ? 'none' : 'block';
-                serial.style.display = isService ? 'none' : 'block';
+            const isService = type.value === 'Service';
+            
+            achatField.style.display = isService ? 'none' : 'block';
+            serialField.style.display = isService ? 'none' : 'block';
+
+            if (isService) {
+                achatInput.removeAttribute('required');
+                serialInput.removeAttribute('required');
+                achatInput.value = '';
+                serialInput.value = '';
+            } else {
+                achatInput.setAttribute('required', 'required');
+                serialInput.setAttribute('required', 'required');
             }
+        }
 
-            type.addEventListener('change', toggle);
-            toggle();
+        document.addEventListener('DOMContentLoaded', () => {
+            toggleFields();
         });
     </script>
 @endsection

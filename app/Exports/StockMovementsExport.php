@@ -34,9 +34,10 @@ class StockMovementsExport implements FromCollection, WithHeadings
                     'Type'     => $movement->movement,
                     'Produit'  => $movement->product->name ?? 'N/A',
                     'Quantité' => $movement->quantity,
+                    'Montant'  => number_format($movement->montant ?? 0, 2),
                     'Date'     => $movement->created_at->format('Y-m-d'),
                     'Heure'    => $movement->created_at->format('H:i'),
-                    'User'     => $movement->user->name ?? 'N/A',
+                    'Utilisateur' => $movement->user->name ?? 'N/A',
                     'Motif'    => $movement->comment ?? '',
                 ];
             });
@@ -48,9 +49,10 @@ class StockMovementsExport implements FromCollection, WithHeadings
             'Type',
             'Produit',
             'Quantité',
+            'Montant',
             'Date',
             'Heure',
-            'User',
+            'Utilisateur',
             'Motif',
         ];
     }

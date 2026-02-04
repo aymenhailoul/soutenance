@@ -1,13 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Facturation')
+@section('title', 'Facturation Produits')
 
 @section('content')
-    <div class="p-8" x-data="invoiceManager()">
+    <div class="p-8" x-data="productInvoiceManager()">
         <div class="mb-6 flex justify-between items-center">
-            <h1 class="text-3xl font-bold text-gray-900">Nouvelle Facture</h1>
-            <div class="text-sm text-gray-500">
-                Date: <span class="font-medium text-gray-900">{{ date('d/m/Y') }}</span>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">Nouvelle Facture de Produits</h1>
+            <div class="text-sm text-gray-500 dark:text-gray-400">
+                Date: <span class="font-medium text-gray-900 dark:text-gray-100">{{ date('d/m/Y') }}</span>
             </div>
         </div>
 
@@ -22,39 +22,34 @@
             <div class="lg:col-span-2 space-y-6">
 
                 <!-- Product Search -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Ajouter un produit ou service</label>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Ajouter un produit</label>
                     <div class="relative">
                         <input type="text" x-model="searchQuery" @input.debounce.300ms="searchProducts()"
-                            @keydown.arrow-down.prevent="navigateProductDown()"
-                            @keydown.arrow-up.prevent="navigateProductUp()"
-                            @keydown.enter.prevent="selectHighlightedProduct()"
-                            @keydown.escape.prevent="searchResults = []; productHighlightIndex = -1"
+                            @keydown.arrow-down.prevent="navigateDown()"
+                            @keydown.arrow-up.prevent="navigateUp()"
+                            @keydown.enter.prevent="selectHighlighted()"
+                            @keydown.escape.prevent="searchResults = []; highlightIndex = -1"
                             placeholder="Rechercher par nom ou code..."
-                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pl-10">
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 pl-10 dark:placeholder-gray-400">
 
 
                         <!-- Search Results Dropdown -->
                         <div x-show="searchResults.length > 0"
-                            class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto"
-                            @click.away="searchResults = []; productHighlightIndex = -1">
+                            class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 rounded-md shadow-lg border border-gray-200 dark:border-gray-600 max-h-60 overflow-y-auto"
+                            @click.away="searchResults = []; highlightIndex = -1">
                             <template x-for="(product, pIndex) in searchResults" :key="product.id">
                                 <div @click="addItem(product)"
-                                    class="px-4 py-3 hover:bg-gray-50 cursor-pointer flex justify-between items-center border-b border-gray-100 last:border-0"
-                                    :class="{ 'bg-blue-100': pIndex === productHighlightIndex }">
+                                    class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer flex justify-between items-center border-b border-gray-100 dark:border-gray-600 last:border-0"
+                                    :class="{ 'bg-blue-100 dark:bg-blue-900': pIndex === highlightIndex }">
                                     <div>
-                                        <div class="font-medium text-gray-900" x-text="product.name"></div>
-                                        <div class="text-xs text-gray-500">
-                                            <span x-text="product.type"></span>
-                                            <template x-if="product.type !== 'Service'">
-                                                <span>
-                                                    | Stock: <span :class="product.stock > 0 ? 'text-green-600' : 'text-red-600'"
-                                                        x-text="product.stock"></span>
-                                                </span>
-                                            </template>
+                                        <div class="font-medium text-gray-900 dark:text-gray-100" x-text="product.name"></div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                            Produit | Stock: <span :class="product.stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"
+                                                x-text="product.stock"></span>
                                         </div>
                                     </div>
-                                    <div class="text-sm font-semibold text-gray-900"
+                                    <div class="text-sm font-semibold text-gray-900 dark:text-gray-100"
                                         x-text="formatPrice(product.prix_vente)"></div>
                                 </div>
                             </template>
@@ -63,49 +58,51 @@
                 </div>
 
                 <!-- Items Table -->
-                <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-700">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                     Produit</th>
                                 <th
-                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-24">
                                     Prix</th>
                                 <th
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">
                                     Qté</th>
                                 <th
-                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">
                                     Remise</th>
                                 <th
-                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-32">
                                     Total</th>
                                 <th
-                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+                                    class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider w-16">
                                 </th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
+                        <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                             <template x-for="(item, index) in items" :key="item.product_id">
                                 <tr>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm font-medium text-gray-900" x-text="item.name"></div>
-                                        <div class="text-xs text-gray-500" x-text="item.type"></div>
+                                        <div class="text-sm font-medium text-gray-900 dark:text-gray-100" x-text="item.name"></div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                            Stock disponible: <span x-text="item.max_stock"></span>
+                                        </div>
                                     </td>
-                                    <td class="px-6 py-4 text-right text-sm text-gray-500"
+                                    <td class="px-6 py-4 text-right text-sm text-gray-500 dark:text-gray-400"
                                         x-text="formatPrice(item.unit_price)"></td>
                                     <td class="px-6 py-4">
                                         <input type="number" x-model.number="item.quantity" min="1"
-                                            :max="item.type === 'Produit' ? item.max_stock : null"
-                                            class="w-full text-center rounded-md border-gray-300 py-1 text-sm focus:border-blue-500 focus:ring-blue-500">
+                                            :max="item.max_stock"
+                                            class="w-full text-center rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 py-1 text-sm focus:border-blue-500 focus:ring-blue-500">
                                     </td>
                                     <td class="px-6 py-4">
                                         <input type="number" x-model.number="item.discount" min="0" step="0.01"
-                                            class="w-full text-right rounded-md border-gray-300 py-1 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            class="w-full text-right rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 py-1 text-sm focus:border-blue-500 focus:ring-blue-500"
                                             placeholder="0.00">
                                     </td>
-                                    <td class="px-6 py-4 text-right text-sm font-semibold text-gray-900"
+                                    <td class="px-6 py-4 text-right text-sm font-semibold text-gray-900 dark:text-gray-100"
                                         x-text="formatPrice((item.unit_price * item.quantity) - item.discount)"></td>
                                     <td class="px-6 py-4 text-center">
                                         <x-icon-button @click="removeItem(index)" variant="danger">
@@ -128,7 +125,7 @@
                                 </tr>
                             </template>
                             <tr x-show="items.length === 0">
-                                <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                                <td colspan="6" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
                                     Aucun produit ajouté à la facture.
                                 </td>
                             </tr>
@@ -140,11 +137,11 @@
             <!-- Right Side: Client & Summary -->
             <div class="space-y-6">
                 <!-- Client Selection -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Client</h3>
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Client</h3>
                     <div class="space-y-4">
                         <div class="relative">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Rechercher un client</label>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Rechercher un client</label>
                             <input type="text" x-model="clientSearchQuery" @input.debounce.300ms="searchClients()"
                                 @focus="if(clientSearchQuery.length >= 2) searchClients()"
                                 @keydown.arrow-down.prevent="navigateClientDown()"
@@ -152,16 +149,16 @@
                                 @keydown.enter.prevent="selectHighlightedClient()"
                                 @keydown.escape.prevent="clientResults = []; clientHighlightIndex = -1"
                                 placeholder="Rechercher par nom..."
-                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:placeholder-gray-400"
                                 x-show="!selectedClient">
 
                             <!-- Selected Client Display -->
                             <div x-show="selectedClient"
-                                class="flex items-center justify-between w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-2">
+                                class="flex items-center justify-between w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-4 py-2">
                                 <div>
-                                    <span class="font-medium text-gray-900"
+                                    <span class="font-medium text-gray-900 dark:text-gray-100"
                                         x-text="selectedClient ? selectedClient.name + ' ' + selectedClient.prenom : ''"></span>
-                                    <span class="text-sm text-gray-500 ml-2"
+                                    <span class="text-sm text-gray-500 dark:text-gray-400 ml-2"
                                         x-text="selectedClient ? selectedClient.phone : ''"></span>
                                 </div>
                                 <button type="button" @click="clearClient()" class="text-red-500 hover:text-red-700">
@@ -174,15 +171,15 @@
 
                             <!-- Client Search Results Dropdown -->
                             <div x-show="clientResults.length > 0 && !selectedClient"
-                                class="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto"
+                                class="absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 rounded-md shadow-lg border border-gray-200 dark:border-gray-600 max-h-60 overflow-y-auto"
                                 @click.away="clientResults = []; clientHighlightIndex = -1">
                                 <template x-for="(client, cIndex) in clientResults" :key="client.id">
                                     <div @click="selectClient(client)"
-                                        class="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0"
-                                        :class="{ 'bg-blue-100': cIndex === clientHighlightIndex }">
-                                        <div class="font-medium text-gray-900" x-text="client.name + ' ' + client.prenom">
+                                        class="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer border-b border-gray-100 dark:border-gray-600 last:border-0"
+                                        :class="{ 'bg-blue-100 dark:bg-blue-900': cIndex === clientHighlightIndex }">
+                                        <div class="font-medium text-gray-900 dark:text-gray-100" x-text="client.name + ' ' + client.prenom">
                                         </div>
-                                        <div class="text-xs text-gray-500" x-text="client.phone"></div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400" x-text="client.phone"></div>
                                     </div>
                                 </template>
                             </div>
@@ -190,25 +187,26 @@
                     </div>
                 </div>
 
+
                 <!-- Invoice Summary -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Résumé</h3>
-                    <div class="space-y-3 pb-4 border-b border-gray-200">
-                        <div class="flex justify-between text-gray-600">
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Résumé</h3>
+                    <div class="space-y-3 pb-4 border-b border-gray-200 dark:border-gray-700">
+                        <div class="flex justify-between text-gray-600 dark:text-gray-400">
                             <span>Sous-total</span>
                             <span x-text="formatPrice(calculateSubtotal())"></span>
                         </div>
-                        <div class="flex justify-between text-gray-600">
+                        <div class="flex justify-between text-gray-600 dark:text-gray-400">
                             <span>Total Remises</span>
-                            <span class="text-green-600" x-text="'- ' + formatPrice(calculateTotalDiscount())"></span>
+                            <span class="text-green-600 dark:text-green-400" x-text="'- ' + formatPrice(calculateTotalDiscount())"></span>
                         </div>
                     </div>
                     <div class="pt-4 flex justify-between items-end mb-6">
-                        <span class="text-lg font-bold text-gray-900">Total à payer</span>
-                        <span class="text-2xl font-bold text-blue-600" x-text="formatPrice(calculateTotal())"></span>
+                        <span class="text-lg font-bold text-gray-900 dark:text-gray-100">Total à payer</span>
+                        <span class="text-2xl font-bold text-blue-600 dark:text-blue-400" x-text="formatPrice(calculateTotal())"></span>
                     </div>
 
-                    <button @click="validateInvoice()" :disabled="loading || items.length === 0 || !selectedClientId"
+                    <button @click="submitInvoice()" :disabled="loading || items.length === 0 || !selectedClientId"
                         class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-bold py-3 px-4 rounded-lg shadow transition-colors flex justify-center items-center gap-2">
                         <svg x-show="loading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg"
                             fill="none" viewBox="0 0 24 24">
@@ -227,11 +225,11 @@
     </div>
 
     <script>
-        function invoiceManager() {
+        function productInvoiceManager() {
             return {
                 searchQuery: '',
                 searchResults: [],
-                productHighlightIndex: -1,
+                highlightIndex: -1,
                 items: [],
                 selectedClientId: '',
                 selectedClient: null,
@@ -241,35 +239,36 @@
                 loading: false,
                 errorMessage: '',
 
+
                 searchProducts() {
-                    this.productHighlightIndex = -1;
+                    this.highlightIndex = -1;
                     if (this.searchQuery.length < 2) {
                         this.searchResults = [];
                         return;
                     }
 
-                    fetch(`{{ route('facturation.search-products') }}?q=${this.searchQuery}`)
+                    fetch(`{{ route('facturation.produits.search') }}?q=${this.searchQuery}`)
                         .then(res => res.json())
                         .then(data => {
                             this.searchResults = data;
                         });
                 },
 
-                navigateProductDown() {
-                    if (this.searchResults.length > 0 && this.productHighlightIndex < this.searchResults.length - 1) {
-                        this.productHighlightIndex++;
+                navigateDown() {
+                    if (this.searchResults.length > 0 && this.highlightIndex < this.searchResults.length - 1) {
+                        this.highlightIndex++;
                     }
                 },
 
-                navigateProductUp() {
-                    if (this.productHighlightIndex > 0) {
-                        this.productHighlightIndex--;
+                navigateUp() {
+                    if (this.highlightIndex > 0) {
+                        this.highlightIndex--;
                     }
                 },
 
-                selectHighlightedProduct() {
-                    if (this.productHighlightIndex >= 0 && this.productHighlightIndex < this.searchResults.length) {
-                        this.addItem(this.searchResults[this.productHighlightIndex]);
+                selectHighlighted() {
+                    if (this.highlightIndex >= 0 && this.highlightIndex < this.searchResults.length) {
+                        this.addItem(this.searchResults[this.highlightIndex]);
                     }
                 },
 
@@ -280,7 +279,7 @@
                         return;
                     }
 
-                    fetch(`{{ route('facturation.search-clients') }}?q=${this.clientSearchQuery}`)
+                    fetch(`{{ route('facturation.produits.search-clients') }}?q=${this.clientSearchQuery}`)
                         .then(res => res.json())
                         .then(data => {
                             this.clientResults = data;
@@ -321,20 +320,23 @@
                     this.clientHighlightIndex = -1;
                 },
 
+
+
                 addItem(product) {
                     const existingItem = this.items.find(item => item.product_id === product.id);
 
                     if (existingItem) {
-                        existingItem.quantity++;
+                        if (existingItem.quantity < existingItem.max_stock) {
+                            existingItem.quantity++;
+                        }
                     } else {
                         this.items.push({
                             product_id: product.id,
                             name: product.name,
-                            type: product.type,
                             unit_price: parseFloat(product.prix_vente),
                             quantity: 1,
                             discount: 0,
-                            max_stock: product.stock // For validation
+                            max_stock: product.stock
                         });
                     }
 
@@ -362,13 +364,13 @@
                     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'MAD' }).format(value);
                 },
 
-                validateInvoice() {
+                submitInvoice() {
                     if (!this.selectedClientId || this.items.length === 0) return;
 
                     this.loading = true;
                     this.errorMessage = '';
 
-                    fetch('{{ route("facturation.store") }}', {
+                    fetch('{{ route("facturation.produits.store") }}', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -383,12 +385,13 @@
                         .then(res => res.json())
                         .then(data => {
                             if (data.success) {
-                                // Download PDF
-                                window.location.href = data.pdf_url;
-                                // Reset form
                                 this.items = [];
                                 this.selectedClientId = '';
-                                alert('Facture créée avec succès !');
+                                this.selectedClient = null;
+                                
+                                if (confirm('Facture de produits créée avec succès ! Voulez-vous la télécharger ?')) {
+                                    window.location.href = data.pdf_url;
+                                }
                             } else {
                                 throw new Error(data.message);
                             }
