@@ -76,7 +76,7 @@
                                 oninput="searchProducts(this.value)" onfocus="showProductDropdown()"
                                 onblur="setTimeout(() => hideProductDropdown(), 200)" />
                             <div id="product-dropdown"
-                                class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto capitalize">
                                 <!-- Products will be populated here -->
                             </div>
                         </div>
@@ -184,7 +184,8 @@
                             <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Prix Achat</label>
                             <input id="prix-achat" type="text" name="prix_achat" value="{{ old('prix_achat') }}"
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
-                                placeholder="0.00" />
+                                placeholder="0.00"
+                                oninput="this.value = this.value.replace(/[^0-9.]/g, '')" />
 
                             @error('prix_achat')
                                 <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ $message }}</p>
@@ -196,7 +197,8 @@
                                     class="text-red-600">*</span></label>
                             <input type="text" name="prix_vente" value="{{ old('prix_vente') }}"
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
-                                placeholder="0.00" required />
+                                placeholder="0.00" required
+                                oninput="this.value = this.value.replace(/[^0-9.]/g, '')" />
                             @error('prix_vente')
                                 <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ $message }}</p>
                             @enderror
@@ -206,7 +208,8 @@
                             <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Code</label>
                             <input id="serial-code" name="serial_code" value="{{ old('serial_code') }}"
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
-                                placeholder="..." />
+                                placeholder="..." 
+                                oninput="this.value = this.value.replace(/[^0-9.]/g, '')" />
 
                             @error('serial_code')
                                 <p class="text-red-600 dark:text-red-400 text-sm mt-1">{{ $message }}</p>
@@ -381,7 +384,7 @@
                 serialCodeWrapper.style.display = 'block';
                 // Add required attribute for Produit type
                 prixAchatInput.setAttribute('required', 'required');
-                serialCodeInput.setAttribute('required', 'required');
+                
             }
         }
 

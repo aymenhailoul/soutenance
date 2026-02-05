@@ -14,7 +14,8 @@ class VenteController extends Controller
     public function index(Request $request): View
     {
         $query = Invoice::with(['client', 'items.product', 'creator'])
-            ->orderBy('invoice_date', 'desc');
+            ->orderBy('invoice_date', 'desc')
+            ->orderBy('created_at', 'desc');
 
         // Filter by client if specified
         if ($request->has('client_id') && $request->client_id) {
