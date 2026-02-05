@@ -34,6 +34,10 @@ class VehicleController extends Controller
      */
     public function destroy(Vehicle $vehicle)
     {
+        if ($vehicle->invoices()->exists()) {
+            return redirect()->back()->with('error', 'Impossible de supprimer ce véhicule car il est lié à des factures.');
+        }
+
         $vehicle->delete();
 
         return redirect()->back()->with('success', 'Véhicule supprimé avec succès.');
