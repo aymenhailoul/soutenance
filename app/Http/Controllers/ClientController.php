@@ -57,9 +57,15 @@ class ClientController extends Controller
 
     public function destroy(Client $client): RedirectResponse
     {
+        // Check for linked data
+        if ($client->invoices()->exists() || $client->vehicles()->exists()) {
+            return redirect()->route('clients.index')
+                ->with('error', 'Impossible de supprimer ce client car il est lié à des factures ou des véhicules.');
+        }
+
         $client->delete();
 
-        return redirect()->route('clients.index')->with('success', 'Client deleted successfully.');
+        return redirect()->route('clients.index')->with('success', 'Client supprimé avec succès.');
     }
 }
 

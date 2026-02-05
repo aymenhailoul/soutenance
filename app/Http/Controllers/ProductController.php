@@ -61,6 +61,10 @@ class ProductController extends Controller
         ], [
             'prix_achat.required_if' => 'veuillez renseigner ce champ',
             'serial_code.required_if' => 'veuillez renseigner ce champ',
+            'serial_code.unique' => 'Ce code série est déjà utilisé.',
+            'prix_achat.regex' => 'Le format du prix d\'achat est invalide.',
+            'prix_vente.regex' => 'Le format du prix de vente est invalide.',
+            'serial_code.integer' => 'Le code série doit être un numéro.',
         ]);
 
         // If Service → force NULL values
@@ -94,6 +98,10 @@ class ProductController extends Controller
         ], [
             'prix_achat.required_if' => 'veuillez renseigner ce champ',
             'serial_code.required_if' => 'veuillez renseigner ce champ',
+            'serial_code.unique' => 'Ce code série est déjà utilisé.',
+            'prix_achat.regex' => 'Le format du prix d\'achat est invalide.',
+            'prix_vente.regex' => 'Le format du prix de vente est invalide.',
+            'serial_code.integer' => 'Le code série doit être un numéro.',
         ]);
 
         // If Service → force NULL values
@@ -116,13 +124,14 @@ class ProductController extends Controller
         $hasHistory = $product->invoiceItems()->exists() || $product->stockMovements()->exists();
 
         if ($hasHistory) {
-            // Soft Delete (Archive)
-            $product->delete();
-            $message = 'Produit supprimé';
+            // Prevent deletion if linked data exists
+            return redirect()
+                ->route('products.index')
+                ->with('error', 'Impossible de supprimer ce produit car il est lié à d\'autres enregistrements.');
         } else {
             // Force Delete (Permanent)
-            $product->forceDelete();
-            $message = 'Produit supprimé';
+            $product->delete();
+            $message = 'Produit supprimé avec succès.';
         }
 
         return redirect()
