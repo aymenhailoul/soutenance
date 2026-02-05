@@ -211,10 +211,7 @@ class StockController extends Controller
 
     public function exportMovements(Request $request)
     {
-        $filters = [
-            'date_from' => $request->date_from,
-            'date_to' => $request->date_to,
-        ];
+        $filters = $request->all();
 
         return \Maatwebsite\Excel\Facades\Excel::download(
             new \App\Exports\StockMovementsExport($filters),

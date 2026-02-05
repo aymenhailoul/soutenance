@@ -22,7 +22,7 @@ class ClientController extends Controller
 
         // Get all clients for the dropdown search (with their vehicles)
         $allClients = Client::with('vehicles:id,client_id,plaque,marque')
-            ->select('id', 'name', 'prenom')
+            ->select('id', 'name', 'prenom', 'phone')
             ->orderBy('name')
             ->get();
 

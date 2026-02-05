@@ -52,7 +52,7 @@
                         </label>
                         <div class="relative">
                             <input type="text" id="client-search" autocomplete="off"
-                                placeholder="Taper nom ou prénom"
+                                placeholder="Taper nom, prénom ou téléphone"
                                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
                                 value="{{ request('client_id') ? $allClients->firstWhere('id', request('client_id'))?->name . ' ' . $allClients->firstWhere('id', request('client_id'))?->prenom : '' }}"
                                 oninput="searchClients(this.value)" onfocus="showClientDropdown()"
@@ -452,12 +452,12 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-900 mb-2">
+                                <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">
                                     Carburant <span class="text-red-600">*</span>
                                 </label>
                                 <select
                                     name="carburant"
-                                    class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400"
                                     required
                                 >
                                     <option value="essence">Essence</option>
@@ -468,11 +468,11 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-semibold text-gray-900 mb-2">Couleur</label>
+                                <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Couleur</label>
                                 <input
                                     name="couleur"
                                     placeholder="Noir, Blanc, Gris..."
-                                    class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                    class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
                                 />
                             </div>
                         </div>
@@ -518,7 +518,8 @@
                 const prenomMatch = c.prenom && c.prenom.toLowerCase().startsWith(queryLower);
                 const fullName = (c.name + ' ' + (c.prenom || '')).toLowerCase();
                 const fullNameMatch = fullName.startsWith(queryLower);
-                return nameMatch || prenomMatch || fullNameMatch;
+                const phoneMatch = c.phone && c.phone.startsWith(query);
+                return nameMatch || prenomMatch || fullNameMatch || phoneMatch;
             });
 
             currentFilteredClients = filtered;
@@ -545,8 +546,8 @@
             }
             item.dataset.index = index;
             let display = `${client.name} ${client.prenom || ''}`;
-            if (client.vehicles && client.vehicles.length > 0) {
-                display += ` (${client.vehicles.length} véhicule(s))`;
+            if (client.phone) {
+                display += ` - ${client.phone}`;
             }
             item.textContent = display;
             item.onclick = () => selectClient(client.id, client.name, client.prenom);

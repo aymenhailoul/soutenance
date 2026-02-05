@@ -83,7 +83,7 @@
                 serialInput.value = '';
             } else {
                 achatInput.setAttribute('required', 'required');
-                serialInput.setAttribute('required', 'required');
+                
             }
         }
 

@@ -58,7 +58,7 @@
                 </div>
 
                 <!-- Product Autocomplete Dropdown -->
-                <div>
+                <div class="capitalize">
                     <label class="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2" for="product-search">
                         Produit <span class="text-red-600">*</span>
                     </label>
@@ -133,11 +133,11 @@
                     <div class="flex gap-3 mb-4">
                         <div class="flex-1 relative">
                             <input type="text" id="bulk-product-search" autocomplete="off" placeholder="Tapez pour chercher un produit..."
-                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400 dark:placeholder-gray-400 capitalize"
                                 oninput="searchBulkProducts(this.value)" onfocus="showBulkProductDropdown()"
                                 onblur="setTimeout(() => hideBulkProductDropdown(), 200)" />
                             <div id="bulk-product-dropdown"
-                                class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto capitalize">
                             </div>
                         </div>
                         <input type="number" id="bulk-quantity-input" min="1" value="1" placeholder="Qté"
@@ -152,7 +152,7 @@
 
                     <!-- Products Table -->
                     <div id="selected-products-container" class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                        <table class="min-w-full">
+                        <table class="min-w-full capitalize">
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
                                     <th class="text-left px-4 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300">Produit</th>

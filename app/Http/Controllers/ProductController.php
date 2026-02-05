@@ -57,10 +57,10 @@ class ProductController extends Controller
             'type' => 'required|in:Produit,Service',
             'prix_achat' => 'nullable|required_if:type,Produit|regex:/^\d+(\.\d{1,2})?$/',
             'prix_vente' => 'required|regex:/^\d+(\.\d{1,2})?$/',
-            'serial_code' => 'nullable|required_if:type,Produit|integer|unique:products,serial_code',
+            'serial_code' => 'nullable|integer|unique:products,serial_code',
         ], [
             'prix_achat.required_if' => 'veuillez renseigner ce champ',
-            'serial_code.required_if' => 'veuillez renseigner ce champ',
+            
             'serial_code.unique' => 'Ce code série est déjà utilisé.',
             'prix_achat.regex' => 'Le format du prix d\'achat est invalide.',
             'prix_vente.regex' => 'Le format du prix de vente est invalide.',
@@ -94,10 +94,10 @@ class ProductController extends Controller
             'type' => 'required|in:Produit,Service',
             'prix_achat' => 'nullable|required_if:type,Produit|regex:/^\d+(\.\d{1,2})?$/',
             'prix_vente' => 'required|regex:/^\d+(\.\d{1,2})?$/',
-            'serial_code' => 'nullable|required_if:type,Produit|integer|unique:products,serial_code,' . $product->id,
+            'serial_code' => 'nullable|integer|unique:products,serial_code,' . $product->id,
         ], [
             'prix_achat.required_if' => 'veuillez renseigner ce champ',
-            'serial_code.required_if' => 'veuillez renseigner ce champ',
+            
             'serial_code.unique' => 'Ce code série est déjà utilisé.',
             'prix_achat.regex' => 'Le format du prix d\'achat est invalide.',
             'prix_vente.regex' => 'Le format du prix de vente est invalide.',

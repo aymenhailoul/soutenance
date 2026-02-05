@@ -22,6 +22,8 @@ class VehicleController extends Controller
             'kilometrage' => 'nullable|integer|min:0',
             'carburant' => 'required|in:essence,diesel,hybride,electrique',
             'couleur' => 'nullable|string|max:255',
+        ], [
+            'plaque.unique' => 'Cette plaque d\'immatriculation est déjà utilisée.',
         ]);
 
         Vehicle::create($validated);
