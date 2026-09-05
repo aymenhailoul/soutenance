@@ -26,7 +26,6 @@ class UserFactory extends Factory
         return [
             'name' => fake()->userName(),
             'password' => static::$password ??= Hash::make('password'),
-            'role' => fake()->randomElement(['Admin', 'Super User', 'User']),
         ];
     }
 
@@ -35,7 +34,7 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn(array $attributes) => [
             // No-op for now – email is not used on the User model
         ]);
     }

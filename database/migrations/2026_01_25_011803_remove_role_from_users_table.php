@@ -6,22 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     /**
-     * Run the migrations.
+     * No-op: The role column is now managed by 2026_01_25_030950_add_it_role_to_users_table.php.
+     * This migration kept for reference only.
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('role');
-        });
+        // Intentionally left empty.
+        // Role column management was moved to 2026_01_25_030950_add_it_role_to_users_table.php
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
-        });
+        //
     }
 };

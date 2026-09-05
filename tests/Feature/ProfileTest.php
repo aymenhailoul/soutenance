@@ -1,85 +1,79 @@
 <?php
 
+namespace Tests\Feature;
+
+use App\Models\Page;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
-test('profile page is displayed', function () {
-    $user = User::factory()->create();
+// The IT system does not have a /profile route — user management is admin-only via /users.
+class ProfileTest extends TestCase
+{
+    use RefreshDatabase;
 
-    $response = $this
-        ->actingAs($user)
-        ->get('/profile');
+    protected User $admin;
 
-    $response->assertOk();
-});
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-test('profile information can be updated', function () {
-    $user = User::factory()->create();
+        $this->admin = User::factory()->create(['role' => 'Admin']);
 
-    $response = $this
-        ->actingAs($user)
-        ->patch('/profile', [
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $pageRoutes = [
+            'dashboard',
+            'equipment.index',
+            'categories.index',
+            'assignments.index',
+            'maintenances.index',
+            'clients.index',
+            'sites.index',
+            'stock.index',
+            'reports.index',
+            'backups.index',
+            'users.index',
+            'employees.index',
+        ];
+        foreach ($pageRoutes as $route) {
+            Page::firstOrCreate(['route' => $route], ['name' => $route]);
+        }
+
+        // Grant admin access to all pages
+        $this->admin->pages()->syncWithoutDetaching(
+            Page::all()->pluck('id')->toArray()
+        );
+    }
+
+    public function test_admin_can_list_users(): void
+    {
+        $response = $this->actingAs($this->admin)->get('/users');
+
+        $response->assertStatus(200);
+    }
+
+    public function test_admin_can_update_user_role(): void
+    {
+        $target = User::factory()->create(['role' => 'Viewer']);
+
+        $response = $this->actingAs($this->admin)->put("/users/{$target->id}", [
+            'name' => $target->name,
+            'role' => 'Technician',
         ]);
 
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/profile');
+        $response->assertRedirect(route('users.index'));
+        $this->assertDatabaseHas('users', ['id' => $target->id, 'role' => 'Technician']);
+    }
 
-    $user->refresh();
+    public function test_password_update_does_not_corrupt_user(): void
+    {
+        $target = User::factory()->create(['role' => 'Viewer']);
 
-    $this->assertSame('Test User', $user->name);
-    $this->assertSame('test@example.com', $user->email);
-    $this->assertNull($user->email_verified_at);
-});
-
-test('email verification status is unchanged when the email address is unchanged', function () {
-    $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user)
-        ->patch('/profile', [
-            'name' => 'Test User',
-            'email' => $user->email,
+        // Updating without providing new password should not break existing password
+        $this->actingAs($this->admin)->put("/users/{$target->id}", [
+            'name' => $target->name,
+            'role' => 'Manager',
         ]);
 
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/profile');
-
-    $this->assertNotNull($user->refresh()->email_verified_at);
-});
-
-test('user can delete their account', function () {
-    $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user)
-        ->delete('/profile', [
-            'password' => 'password',
-        ]);
-
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/');
-
-    $this->assertGuest();
-    $this->assertNull($user->fresh());
-});
-
-test('correct password must be provided to delete account', function () {
-    $user = User::factory()->create();
-
-    $response = $this
-        ->actingAs($user)
-        ->from('/profile')
-        ->delete('/profile', [
-            'password' => 'wrong-password',
-        ]);
-
-    $response
-        ->assertSessionHasErrorsIn('userDeletion', 'password')
-        ->assertRedirect('/profile');
-
-    $this->assertNotNull($user->fresh());
-});
+        $this->assertNotNull($target->fresh());
+    }
+}

@@ -11,23 +11,23 @@ class Client extends Model
 
     protected $fillable = [
         'name',
-        'prenom',
+        'code',
+        'ice',
+        'contact_person',
         'phone',
+        'email',
+        'address',
+        'city',
+        'notes',
     ];
 
-    /**
-     * Get all vehicles for this client.
-     */
-    public function vehicles()
+    public function sites()
     {
-        return $this->hasMany(Vehicle::class);
+        return $this->hasMany(Site::class);
     }
 
-    /**
-     * Get all invoices for this client.
-     */
-    public function invoices()
+    public function assignments()
     {
-        return $this->hasMany(Invoice::class);
+        return $this->hasMany(EquipmentAssignment::class);
     }
 }

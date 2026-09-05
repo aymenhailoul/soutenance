@@ -29,6 +29,14 @@ class CheckPagePermission
             return $next($request);
         }
 
+        if ($currentRoute === 'pages.test') {
+            $targetPage = $request->route('page');
+            if ($targetPage && !$user->hasPageAccess($targetPage)) {
+                abort(403, "Vous n'avez pas la permission d'accéder à cette page ({$targetPage}).");
+            }
+            return $next($request);
+        }
+
         // Check if user has permission to access this page
         // The hasPageAccess method on the User model handles all inheritance logic
         if (!$user->hasPageAccess($currentRoute)) {

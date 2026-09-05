@@ -43,10 +43,10 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'      => 'required|string|max:255',
-            'cin'       => 'required|string|max:50|unique:employees,cin',
-            'salary'    => 'required|regex:/^\d+(\.\d{1,2})?$/',
-            'joined_at' => 'required|date',
+            'name' => ['required', 'string', 'min:2', 'max:100', 'regex:/^[\pL\s\-]+$/u'],
+            'cin' => ['required', 'string', 'alpha_num', 'min:3', 'max:30', 'unique:employees,cin'],
+            'salary' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+            'joined_at' => ['required', 'date', 'before_or_equal:today'],
         ]);
 
         Employee::create($data);
@@ -66,10 +66,10 @@ class EmployeeController extends Controller
     public function update(Request $request, Employee $employee)
     {
         $data = $request->validate([
-            'name'      => 'required|string|max:255',
-            'cin'       => 'required|string|max:50|unique:employees,cin,' . $employee->id,
-            'salary'    => 'required|regex:/^\d+(\.\d{1,2})?$/',
-            'joined_at' => 'required|date',
+            'name' => ['required', 'string', 'min:2', 'max:100', 'regex:/^[\pL\s\-]+$/u'],
+            'cin' => ['required', 'string', 'alpha_num', 'min:3', 'max:30', 'unique:employees,cin,' . $employee->id],
+            'salary' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+            'joined_at' => ['required', 'date', 'before_or_equal:today'],
         ]);
 
         $employee->update($data);

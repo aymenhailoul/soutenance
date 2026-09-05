@@ -12,7 +12,7 @@ class StockMovement extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'product_id',
+        'equipment_id',
         'movement',
         'quantity',
         'prix_achat',
@@ -25,12 +25,14 @@ class StockMovement extends Model
     {
         return [
             'created_at' => 'datetime',
+            'prix_achat' => 'decimal:2',
+            'montant' => 'decimal:2',
         ];
     }
 
-    public function product()
+    public function equipment()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Equipment::class, 'equipment_id');
     }
 
     public function user()

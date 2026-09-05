@@ -13,7 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'page.permission' => \App\Http\Middleware\CheckPagePermission::class,
+            'prevent.back' => \App\Http\Middleware\PreventBackHistory::class,
         ]);
+
+        $middleware->appendToGroup('web', \App\Http\Middleware\PreventBackHistory::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

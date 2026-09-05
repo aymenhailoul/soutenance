@@ -8,27 +8,24 @@ use Illuminate\Database\Seeder;
 
 class AdminUserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Delete all existing users
-        User::query()->delete();
-        $this->command->info('All existing users deleted.');
+        // Create or update the admin user
+        $admin = User::updateOrCreate(
+            ['name' => 'aymen'],
+            [
+                'password' => 'gokussj2', // hashed automatically via User model cast
+                'role' => 'Admin',
+            ]
+        );
 
-        // Create admin user
-        $admin = User::create([
-            'name' => 'admin',
-            'password' => 'admin123', // Will be hashed automatically
-        ]);
-
-        // Give admin access to all pages
+        // Give admin access to ALL pages
         $allPageIds = Page::pluck('id')->toArray();
         $admin->pages()->sync($allPageIds);
 
-        $this->command->info('Admin user created with access to all pages!');
-        $this->command->info('Username: admin');
-        $this->command->info('Password: admin123');
+        $this->command->info('Admin user ready!');
+        $this->command->info('Username : aymen');
+        $this->command->info('Password : gokussj2');
+        $this->command->info('Role     : Admin');
     }
 }

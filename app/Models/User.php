@@ -20,6 +20,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'password',
+        'role',
     ];
 
 
@@ -48,6 +49,26 @@ class User extends Authenticatable
     public function getAuthIdentifierName()
     {
         return 'name';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'Admin';
+    }
+
+    public function isManager(): bool
+    {
+        return in_array($this->role, ['Admin', 'Manager']);
+    }
+
+    public function isTechnician(): bool
+    {
+        return in_array($this->role, ['Admin', 'Manager', 'Technician']);
+    }
+
+    public function isViewer(): bool
+    {
+        return in_array($this->role, ['Admin', 'Manager', 'Technician', 'Viewer']);
     }
 
     public function pages()
@@ -141,8 +162,10 @@ class User extends Authenticatable
                     return false;
                 }
                 // For other facturation routes (pdf, cancel), check for either permission
-                if ($this->pages()->where('route', 'facturation.services.index')->exists() ||
-                    $this->pages()->where('route', 'facturation.produits.index')->exists()) {
+                if (
+                    $this->pages()->where('route', 'facturation.services.index')->exists() ||
+                    $this->pages()->where('route', 'facturation.produits.index')->exists()
+                ) {
                     return true;
                 }
                 return false;
