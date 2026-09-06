@@ -17,15 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'page.permission'])->group(function () {
     Route::get('/', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/_debug/auth', function () {
-        return response()->json([
-            'auth_check' => auth()->check(),
-            'user_id' => auth()->id(),
-            'user_name' => auth()->user()?->name,
-            'session_driver' => config('session.driver'),
-        ]);
-    })->name('debug.auth');
-
     // Category routes
     Route::resource('categories', CategoryController::class);
 
@@ -70,7 +61,7 @@ Route::middleware(['auth', 'page.permission'])->group(function () {
     Route::get('/reports/export/equipment', [ReportController::class, 'exportEquipment'])->name('reports.export.equipment');
     Route::get('/reports/export/assignments', [ReportController::class, 'exportAssignments'])->name('reports.export.assignments');
 
-    // Backup & Azurite Storage routes
+    // Backup & Storage routes
     Route::get('/backups', [BackupController::class, 'index'])->name('backups.index');
     Route::post('/backups', [BackupController::class, 'store'])->name('backups.store');
     Route::get('/backups/{backup}/download', [BackupController::class, 'download'])->name('backups.download');
@@ -85,21 +76,6 @@ Route::middleware(['auth', 'page.permission'])->group(function () {
     Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
     Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
     Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
-
-    // Test route
-    Route::get('/meeting', function () {
-        return view('meeting');
-    })->name('meeting.index');
-
-    // Generic Test Page route for custom/fake pages added in user management
-    Route::get('/pages/test/{page?}', function (Illuminate\Http\Request $request, $page = 'fake.page') {
-        $pageModel = \App\Models\Page::where('route', $page)->first();
-        $pageName = $pageModel ? $pageModel->name : ucfirst(str_replace(['.', '_', '-'], ' ', $page));
-        return view('pages.test', [
-            'pageName' => $pageName,
-            'pageRoute' => $page,
-        ]);
-    })->name('pages.test');
 });
 
 require __DIR__ . '/auth.php';

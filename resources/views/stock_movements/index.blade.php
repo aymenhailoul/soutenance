@@ -159,21 +159,44 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4" x-data="{ movementType: 'Entrée' }">
                     <div>
                         <x-input-label for="movement" value="Type de mouvement *" />
-                        <select name="movement"
+                        <select name="movement" x-model="movementType"
                             class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"
                             required>
                             <option value="Entrée">Entrée (+ Stock)</option>
                             <option value="Sortie">Sortie (- Stock)</option>
-                            <option value="Transfert">Transfert</option>
+                            <option value="Transfert">Transfert Inter-Sites</option>
                         </select>
                     </div>
                     <div>
                         <x-input-label for="quantity" value="Quantité *" />
                         <x-text-input name="quantity" type="number" min="1" class="mt-1 block w-full" value="1"
                             required />
+                    </div>
+
+                    <div class="col-span-2 grid grid-cols-2 gap-4" x-show="movementType === 'Transfert'" x-cloak>
+                        <div>
+                            <x-input-label for="source_site_id" value="Site d'origine" />
+                            <select name="source_site_id"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                <option value="">Sélectionner site d'origine...</option>
+                                @foreach($sites as $site)
+                                    <option value="{{ $site->id }}">{{ $site->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <x-input-label for="destination_site_id" value="Site de destination *" />
+                            <select name="destination_site_id"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                <option value="">Sélectionner site de destination...</option>
+                                @foreach($sites as $site)
+                                    <option value="{{ $site->id }}">{{ $site->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div>

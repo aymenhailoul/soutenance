@@ -15,6 +15,8 @@ class StockMovement extends Model
         'equipment_id',
         'movement',
         'quantity',
+        'source_site_id',
+        'destination_site_id',
         'prix_achat',
         'montant',
         'user_id',
@@ -32,11 +34,21 @@ class StockMovement extends Model
 
     public function equipment()
     {
-        return $this->belongsTo(Equipment::class, 'equipment_id');
+        return $this->belongsTo(Equipment::class, 'equipment_id')->withTrashed();
     }
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function sourceSite()
+    {
+        return $this->belongsTo(Site::class, 'source_site_id');
+    }
+
+    public function destinationSite()
+    {
+        return $this->belongsTo(Site::class, 'destination_site_id');
     }
 }

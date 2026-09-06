@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Equipment extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'equipment';
 
@@ -54,9 +55,19 @@ class Equipment extends Model
         return $this->hasMany(EquipmentAssignment::class, 'equipment_id');
     }
 
+    public function activeAssignment()
+    {
+        return $this->hasOne(EquipmentAssignment::class, 'equipment_id')->where('status', 'Active');
+    }
+
     public function maintenances()
     {
         return $this->hasMany(Maintenance::class, 'equipment_id');
+    }
+
+    public function activeMaintenances()
+    {
+        return $this->hasMany(Maintenance::class, 'equipment_id')->whereIn('status', ['Scheduled', 'In Progress']);
     }
 
     public function site()
@@ -64,13 +75,35 @@ class Equipment extends Model
         return $this->belongsTo(Site::class, 'site_id');
     }
 
+    public function isConsumable(): bool
+    {
+        return (bool) $this->is_consumable;
+    }
+
+    public function isAssignable(): bool
+    {
+        if ($this->is_consumable) {
+            return false;
+        }
+
+        if ($this->status !== 'Available') {
+            return false;
+        }
+
+        if ($this->activeAssignment()->exists()) {
+            return false;
+        }
+
+        if ($this->activeMaintenances()->exists()) {
+            return false;
+        }
+
+        return true;
+    }
+
     public function getStockAttribute(): int
     {
-        if (!$this->is_consumable) {
-            return $this->quantity;
-        }
-        $entries = (int) $this->stockMovements()->where('movement', 'Entrée')->sum('quantity');
-        $exits = (int) $this->stockMovements()->where('movement', 'Sortie')->sum('quantity');
-        return $entries - $exits;
+        return $this->quantity;
     }
 }
+

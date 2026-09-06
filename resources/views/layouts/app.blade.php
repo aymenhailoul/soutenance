@@ -387,6 +387,48 @@
                     </div>
                 </header>
             @endif
+
+            <!-- Global Alert Banners for Success & Errors -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 space-y-3">
+                @if(session('success'))
+                    <div class="p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 dark:bg-emerald-900/30 dark:border-emerald-500 dark:text-emerald-300 rounded-r-lg flex items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="font-medium text-sm">{{ session('success') }}</span>
+                        </div>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-800 dark:bg-rose-900/30 dark:border-rose-500 dark:text-rose-300 rounded-r-lg flex items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 text-rose-600 dark:text-rose-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="font-medium text-sm">{{ session('error') }}</span>
+                        </div>
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="p-4 bg-rose-50 border-l-4 border-rose-500 text-rose-800 dark:bg-rose-900/30 dark:border-rose-500 dark:text-rose-300 rounded-r-lg shadow-sm">
+                        <div class="flex items-center gap-3 mb-2 font-semibold text-sm">
+                            <svg class="w-5 h-5 text-rose-600 dark:text-rose-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Erreur / Attention : Veuillez corriger les points suivants</span>
+                        </div>
+                        <ul class="list-disc list-inside space-y-1 text-sm pl-2">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+            </div>
+
             @yield('content')
             {{ $slot ?? '' }}
         </main>

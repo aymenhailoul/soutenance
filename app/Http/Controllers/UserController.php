@@ -83,7 +83,7 @@ class UserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'min:2', 'max:100', 'unique:users,name', 'regex:/^[\pL\s\-]+$/u'],
+            'name' => ['required', 'string', 'min:2', 'max:100', 'unique:users,name', 'regex:/^[\pL\pN\s\.\_\-]+$/u'],
             'password' => ['required', 'string', 'min:8'],
             'role' => ['required', Rule::in(['Admin', 'Manager', 'Technician', 'Viewer'])],
             'pages' => ['nullable', 'array'],
@@ -113,7 +113,7 @@ class UserController extends Controller
     public function update(Request $request, User $user): RedirectResponse
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'min:2', 'max:100', Rule::unique('users', 'name')->ignore($user->id), 'regex:/^[\pL\s\-]+$/u'],
+            'name' => ['required', 'string', 'min:2', 'max:100', Rule::unique('users', 'name')->ignore($user->id), 'regex:/^[\pL\pN\s\.\_\-]+$/u'],
             'password' => ['nullable', 'string', 'min:8'],
             'role' => ['required', Rule::in(['Admin', 'Manager', 'Technician', 'Viewer'])],
             'pages' => ['nullable', 'array'],

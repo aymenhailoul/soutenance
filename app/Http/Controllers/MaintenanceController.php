@@ -4,10 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Equipment;
 use App\Models\Maintenance;
+use App\Services\MaintenanceService;
 use Illuminate\Http\Request;
 
 class MaintenanceController extends Controller
 {
+    protected MaintenanceService $maintenanceService;
+
+    public function __construct(MaintenanceService $maintenanceService)
+    {
+        $this->maintenanceService = $maintenanceService;
+    }
+
     public function index(Request $request)
     {
         $query = Maintenance::with('equipment');
@@ -25,7 +33,7 @@ class MaintenanceController extends Controller
         }
 
         $maintenances = $query->orderBy('scheduled_at', 'desc')->paginate(15)->withQueryString();
-        $equipments = Equipment::orderBy('name')->get();
+        $equipments = Equipment::where('is_consumable', false)->orderBy('name')->get();
 
         return view('maintenances.index', compact('maintenances', 'equipments'));
     }
@@ -44,14 +52,7 @@ class MaintenanceController extends Controller
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $maintenance = Maintenance::create($validated);
-
-        // If maintenance is set to 'In Progress', set equipment status to 'In Maintenance'
-        if ($validated['status'] === 'In Progress') {
-            Equipment::where('id', $validated['equipment_id'])->update(['status' => 'In Maintenance']);
-        } elseif ($validated['status'] === 'Completed') {
-            Equipment::where('id', $validated['equipment_id'])->update(['status' => 'Available']);
-        }
+        $this->maintenanceService->createMaintenance($validated);
 
         return redirect()->route('maintenances.index')->with('success', 'Maintenance enregistrée avec succès.');
     }
@@ -69,23 +70,7 @@ class MaintenanceController extends Controller
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $maintenance->update($validated);
-
-        // Update equipment status based on maintenance state
-        $equipment = $maintenance->equipment;
-        if ($equipment) {
-            if ($validated['status'] === 'In Progress') {
-                $equipment->update(['status' => 'In Maintenance']);
-            } elseif ($validated['status'] === 'Completed') {
-                $activeMaintenances = Maintenance::where('equipment_id', $equipment->id)
-                    ->whereIn('status', ['In Progress'])
-                    ->where('id', '!=', $maintenance->id)
-                    ->count();
-                if ($activeMaintenances === 0 && $equipment->status === 'In Maintenance') {
-                    $equipment->update(['status' => 'Available']);
-                }
-            }
-        }
+        $this->maintenanceService->updateMaintenance($maintenance, $validated);
 
         return redirect()->route('maintenances.index')->with('success', 'Maintenance mise à jour avec succès.');
     }

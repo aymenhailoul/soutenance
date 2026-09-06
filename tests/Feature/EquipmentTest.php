@@ -125,6 +125,6 @@ class EquipmentTest extends TestCase
         $response = $this->actingAs($this->user)->delete(route('equipment.destroy', $equipment));
 
         $response->assertRedirect(route('equipment.index'));
-        $this->assertDatabaseMissing('equipment', ['id' => $equipment->id]);
+        $this->assertSoftDeleted('equipment', ['id' => $equipment->id]);
     }
 }

@@ -45,6 +45,7 @@ class AssignmentTest extends TestCase
             'status' => 'Available',
             'condition' => 'Good',
             'quantity' => 1,
+            'is_consumable' => false,
         ]);
     }
 
@@ -52,8 +53,6 @@ class AssignmentTest extends TestCase
     {
         EquipmentAssignment::create([
             'equipment_id' => $this->equipment->id,
-            'client_id' => $this->client->id,
-            'site_id' => $this->site->id,
             'employee_id' => $this->employee->id,
             'assigned_at' => now(),
             'status' => 'Active',
@@ -66,12 +65,10 @@ class AssignmentTest extends TestCase
         $response->assertSee('Karim Alami');
     }
 
-    public function test_can_create_assignment_and_updates_equipment_status(): void
+    public function test_can_create_assignment_with_single_target_and_updates_equipment_status(): void
     {
         $response = $this->actingAs($this->user)->post(route('assignments.store'), [
             'equipment_id' => $this->equipment->id,
-            'client_id' => $this->client->id,
-            'site_id' => $this->site->id,
             'employee_id' => $this->employee->id,
             'assigned_at' => now()->format('Y-m-d H:i:s'),
             'notes' => 'Affectation poste de travail IT',
@@ -88,16 +85,34 @@ class AssignmentTest extends TestCase
         $this->assertDatabaseHas('equipment', [
             'id' => $this->equipment->id,
             'status' => 'Assigned',
-            'site_id' => $this->site->id,
         ]);
+    }
+
+    public function test_cannot_assign_already_assigned_equipment(): void
+    {
+        // First assignment
+        EquipmentAssignment::create([
+            'equipment_id' => $this->equipment->id,
+            'employee_id' => $this->employee->id,
+            'assigned_at' => now(),
+            'status' => 'Active',
+        ]);
+        $this->equipment->update(['status' => 'Assigned']);
+
+        // Attempt second assignment
+        $response = $this->actingAs($this->user)->post(route('assignments.store'), [
+            'equipment_id' => $this->equipment->id,
+            'client_id' => $this->client->id,
+            'assigned_at' => now()->format('Y-m-d H:i:s'),
+        ]);
+
+        $response->assertSessionHasErrors('equipment_id');
     }
 
     public function test_can_return_assignment_and_restores_equipment_status(): void
     {
         $assignment = EquipmentAssignment::create([
             'equipment_id' => $this->equipment->id,
-            'client_id' => $this->client->id,
-            'site_id' => $this->site->id,
             'employee_id' => $this->employee->id,
             'assigned_at' => now()->subDays(10),
             'status' => 'Active',
