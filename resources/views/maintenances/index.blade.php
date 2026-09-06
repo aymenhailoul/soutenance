@@ -168,7 +168,8 @@
 
                             <!-- Edit Modal -->
                             <x-modal name="edit-maint-{{ $maintenance->id }}" focusable>
-                                <form method="POST" action="{{ route('maintenances.update', $maintenance) }}" class="p-6">
+                                <form method="POST" action="{{ route('maintenances.update', $maintenance) }}" class="p-6"
+                                    x-data="{ status: '{{ old('status', $maintenance->status) }}' }">
                                     @csrf
                                     @method('PUT')
                                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Modifier la
@@ -178,6 +179,9 @@
                                             <x-input-label for="title" value="Titre / Description *" />
                                             <x-text-input name="title" type="text" class="mt-1 block w-full"
                                                 value="{{ old('title', $maintenance->title) }}" required />
+                                            @error('title')
+                                                <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
@@ -185,21 +189,27 @@
                                                 <select name="type"
                                                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"
                                                     required>
-                                                    <option value="Preventive" {{ $maintenance->type == 'Preventive' ? 'selected' : '' }}>Préventive</option>
-                                                    <option value="Corrective" {{ $maintenance->type == 'Corrective' ? 'selected' : '' }}>Corrective</option>
-                                                    <option value="Upgrade" {{ $maintenance->type == 'Upgrade' ? 'selected' : '' }}>Mise à niveau</option>
+                                                    <option value="Preventive" {{ old('type', $maintenance->type) == 'Preventive' ? 'selected' : '' }}>Préventive</option>
+                                                    <option value="Corrective" {{ old('type', $maintenance->type) == 'Corrective' ? 'selected' : '' }}>Corrective</option>
+                                                    <option value="Upgrade" {{ old('type', $maintenance->type) == 'Upgrade' ? 'selected' : '' }}>Mise à niveau</option>
                                                 </select>
+                                                @error('type')
+                                                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                             <div>
                                                 <x-input-label for="status" value="Statut *" />
-                                                <select name="status"
+                                                <select name="status" x-model="status"
                                                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"
                                                     required>
-                                                    <option value="Scheduled" {{ $maintenance->status == 'Scheduled' ? 'selected' : '' }}>Planifiée</option>
-                                                    <option value="In Progress" {{ $maintenance->status == 'In Progress' ? 'selected' : '' }}>En cours</option>
-                                                    <option value="Completed" {{ $maintenance->status == 'Completed' ? 'selected' : '' }}>Terminée</option>
-                                                    <option value="Cancelled" {{ $maintenance->status == 'Cancelled' ? 'selected' : '' }}>Annulée</option>
+                                                    <option value="Scheduled">Planifiée</option>
+                                                    <option value="In Progress">En cours</option>
+                                                    <option value="Completed">Terminée</option>
+                                                    <option value="Cancelled">Annulée</option>
                                                 </select>
+                                                @error('status')
+                                                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                         </div>
                                         <div class="grid grid-cols-2 gap-4">
@@ -207,12 +217,18 @@
                                                 <x-input-label for="provider" value="Prestataire / Intervenant" />
                                                 <x-text-input name="provider" type="text" class="mt-1 block w-full"
                                                     value="{{ old('provider', $maintenance->provider) }}" />
+                                                @error('provider')
+                                                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                             <div>
                                                 <x-input-label for="cost" value="Coût (MAD)" />
-                                                <x-text-input name="cost" type="number" step="0.01"
+                                                <x-text-input name="cost" type="number" step="0.01" min="0"
                                                     class="mt-1 block w-full"
                                                     value="{{ old('cost', $maintenance->cost) }}" />
+                                                @error('cost')
+                                                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                         </div>
                                         <div class="grid grid-cols-2 gap-4">
@@ -222,12 +238,19 @@
                                                     class="mt-1 block w-full"
                                                     value="{{ old('scheduled_at', $maintenance->scheduled_at ? $maintenance->scheduled_at->format('Y-m-d\TH:i') : '') }}"
                                                     required />
+                                                @error('scheduled_at')
+                                                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                             <div>
                                                 <x-input-label for="completed_at" value="Date de fin" />
                                                 <x-text-input name="completed_at" type="datetime-local"
                                                     class="mt-1 block w-full"
                                                     value="{{ old('completed_at', $maintenance->completed_at ? $maintenance->completed_at->format('Y-m-d\TH:i') : '') }}" />
+                                                <p class="mt-1 text-xs text-gray-500" x-show="status === 'Completed'">La date de fin sera renseignée automatiquement si laissée vide.</p>
+                                                @error('completed_at')
+                                                    <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                         </div>
                                         <div>
@@ -235,6 +258,9 @@
                                             <textarea name="notes"
                                                 class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"
                                                 rows="3">{{ old('notes', $maintenance->notes) }}</textarea>
+                                            @error('notes')
+                                                <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                     <div class="mt-6 flex justify-end gap-3">
@@ -263,10 +289,17 @@
 
     <!-- Create Modal -->
     <x-modal name="create-maintenance" focusable>
-        <form method="POST" action="{{ route('maintenances.store') }}" class="p-6">
+        <form method="POST" action="{{ route('maintenances.store') }}" class="p-6"
+            x-data="{ status: '{{ old('status', 'Scheduled') }}' }">
             @csrf
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Programmer / Déclarer une Maintenance
-            </h3>
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Programmer / Déclarer une Maintenance</h3>
+
+            @if($equipments->isEmpty())
+                <div class="p-4 mb-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-md dark:bg-amber-900/30 dark:border-amber-700 dark:text-amber-300 text-sm">
+                    ⚠️ Aucun équipement valide disponible pour maintenance (les consommables et équipements réformés/perdus sont exclus).
+                </div>
+            @endif
+
             <div class="space-y-4">
                 <div>
                     <x-input-label for="equipment_id" value="Équipement concerné *" />
@@ -275,14 +308,23 @@
                         required>
                         <option value="">Sélectionner un équipement...</option>
                         @foreach($equipments as $eq)
-                            <option value="{{ $eq->id }}">{{ $eq->name }} (S/N: {{ $eq->serial_number ?? 'N/A' }})</option>
+                            <option value="{{ $eq->id }}" {{ old('equipment_id') == $eq->id ? 'selected' : '' }}>
+                                {{ $eq->name }} (S/N: {{ $eq->serial_number ?? 'N/A' }}) - Statut: {{ $eq->status }}
+                            </option>
                         @endforeach
                     </select>
+                    @error('equipment_id')
+                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div>
                     <x-input-label for="title" value="Titre / Motif de la maintenance *" />
                     <x-text-input name="title" type="text" class="mt-1 block w-full"
+                        value="{{ old('title') }}"
                         placeholder="Ex: Nettoyage et changement pâte thermique" required />
+                    @error('title')
+                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -290,54 +332,78 @@
                         <select name="type"
                             class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"
                             required>
-                            <option value="Preventive">Préventive</option>
-                            <option value="Corrective">Corrective</option>
-                            <option value="Upgrade">Mise à niveau</option>
+                            <option value="Preventive" {{ old('type') == 'Preventive' ? 'selected' : '' }}>Préventive</option>
+                            <option value="Corrective" {{ old('type') == 'Corrective' ? 'selected' : '' }}>Corrective</option>
+                            <option value="Upgrade" {{ old('type') == 'Upgrade' ? 'selected' : '' }}>Mise à niveau</option>
                         </select>
+                        @error('type')
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
                         <x-input-label for="status" value="Statut *" />
-                        <select name="status"
+                        <select name="status" x-model="status"
                             class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"
                             required>
                             <option value="Scheduled">Planifiée</option>
                             <option value="In Progress">En cours</option>
                             <option value="Completed">Terminée</option>
                         </select>
+                        @error('status')
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <x-input-label for="provider" value="Prestataire / Intervenant" />
                         <x-text-input name="provider" type="text" class="mt-1 block w-full"
+                            value="{{ old('provider') }}"
                             placeholder="Ex: SAV Dell Morocco" />
+                        @error('provider')
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
                         <x-input-label for="cost" value="Coût estimé / réel (MAD)" />
-                        <x-text-input name="cost" type="number" step="0.01" class="mt-1 block w-full" value="0.00" />
+                        <x-text-input name="cost" type="number" step="0.01" min="0" class="mt-1 block w-full" value="{{ old('cost', '0.00') }}" />
+                        @error('cost')
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <x-input-label for="scheduled_at" value="Date prévue *" />
                         <x-text-input name="scheduled_at" type="datetime-local" class="mt-1 block w-full"
-                            value="{{ now()->format('Y-m-d\TH:i') }}" required />
+                            value="{{ old('scheduled_at', now()->format('Y-m-d\TH:i')) }}" required />
+                        @error('scheduled_at')
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
-                        <x-input-label for="completed_at" value="Date de fin (si terminée)" />
-                        <x-text-input name="completed_at" type="datetime-local" class="mt-1 block w-full" />
+                        <x-input-label for="completed_at" value="Date de fin" />
+                        <x-text-input name="completed_at" type="datetime-local" class="mt-1 block w-full"
+                            value="{{ old('completed_at') }}" />
+                        <p class="mt-1 text-xs text-gray-500" x-show="status === 'Completed'">Renseignée automatiquement à la validation si laissée vide.</p>
+                        @error('completed_at')
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
                 <div>
                     <x-input-label for="notes" value="Remarques / Rapport d'intervention" />
                     <textarea name="notes"
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"
-                        rows="3" placeholder="Détails des opérations effectuées..."></textarea>
+                        rows="3" placeholder="Détails des opérations effectuées...">{{ old('notes') }}</textarea>
+                    @error('notes')
+                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
             <div class="mt-6 flex justify-end gap-3">
                 <x-secondary-button x-on:click="$dispatch('close')">Annuler</x-secondary-button>
-                <x-primary-button>Enregistrer la maintenance</x-primary-button>
+                <x-primary-button :disabled="$equipments->isEmpty()">Enregistrer la maintenance</x-primary-button>
             </div>
         </form>
     </x-modal>

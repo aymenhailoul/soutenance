@@ -29,6 +29,7 @@
         @endif
 
         <form method="POST" action="{{ route('equipment.store') }}"
+            x-data="{ isConsumable: {{ old('is_consumable') ? 'true' : 'false' }} }"
             class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 space-y-6">
             @csrf
 
@@ -123,18 +124,13 @@
                     Statut & État</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Statut *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Statut Initial *</label>
                         <select name="status" required
                             class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
-                            <option value="Available" {{ old('status', 'Available') == 'Available' ? 'selected' : '' }}>
-                                Disponible</option>
-                            <option value="Assigned" {{ old('status') == 'Assigned' ? 'selected' : '' }}>Assigné</option>
-                            <option value="In Maintenance" {{ old('status') == 'In Maintenance' ? 'selected' : '' }}>En
-                                Maintenance</option>
+                            <option value="Available" selected>Disponible</option>
                             <option value="Broken" {{ old('status') == 'Broken' ? 'selected' : '' }}>En Panne</option>
-                            <option value="Retired" {{ old('status') == 'Retired' ? 'selected' : '' }}>Retiré</option>
-                            <option value="Lost" {{ old('status') == 'Lost' ? 'selected' : '' }}>Perdu</option>
                         </select>
+                        <p class="text-xs text-gray-500 mt-1">Le matériel démarre à l'état Disponible. Les affectations et maintenances gèrent ensuite le statut automatiquement.</p>
                     </div>
 
                     <div>
@@ -158,17 +154,26 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
                     <div class="sm:col-span-1 pt-4">
                         <label class="inline-flex items-center gap-2 cursor-pointer">
-                            <input type="checkbox" name="is_consumable" value="1" {{ old('is_consumable') ? 'checked' : '' }} class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <input type="checkbox" name="is_consumable" value="1" x-model="isConsumable" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                             <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Est un consommable (Câble,
                                 souris, etc.)</span>
                         </label>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantité *</label>
-                        <input type="number" name="quantity" value="{{ old('quantity', 1) }}" min="1" required
-                            class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
+                        <template x-if="!isConsumable">
+                            <div>
+                                <input type="number" name="quantity" value="1" readonly required
+                                    class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-500 dark:text-gray-400 cursor-not-allowed">
+                                <p class="text-xs text-gray-500 mt-1">Matériel individuel (Quantité = 1)</p>
+                            </div>
+                        </template>
+                        <template x-if="isConsumable">
+                            <input type="number" name="quantity" value="{{ old('quantity', 1) }}" min="0" required
+                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500">
+                        </template>
                     </div>
-                    <div>
+                    <div x-show="isConsumable">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Seuil Alerte Stock
                             Bas</label>
                         <input type="number" name="min_stock" value="{{ old('min_stock', 0) }}" min="0"

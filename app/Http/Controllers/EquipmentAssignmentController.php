@@ -32,7 +32,10 @@ class EquipmentAssignmentController extends Controller
         }
 
         $assignments = $query->orderBy('assigned_at', 'desc')->paginate(15)->withQueryString();
-        $equipments = Equipment::where('is_consumable', false)->orderBy('name')->get();
+        $equipments = Equipment::where('is_consumable', false)
+            ->where('status', 'Available')
+            ->orderBy('name')
+            ->get();
         $clients = Client::orderBy('name')->get();
         $sites = Site::orderBy('name')->get();
         $employees = Employee::orderBy('name')->get();

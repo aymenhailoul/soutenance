@@ -216,8 +216,11 @@
             <div class="space-y-4">
                 <div>
                     <x-input-label for="name" value="Nom du Site *" />
-                    <x-text-input name="name" type="text" class="mt-1 block w-full" placeholder="Ex: Agence Technopark"
+                    <x-text-input name="name" type="text" class="mt-1 block w-full" value="{{ old('name') }}" placeholder="Ex: Agence Technopark"
                         required />
+                    @error('name')
+                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -226,36 +229,54 @@
                             class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                             <option value="">ISS Maroc (Interne)</option>
                             @foreach($clients as $c)
-                                <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                <option value="{{ $c->id }}" {{ old('client_id') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
                             @endforeach
                         </select>
+                        @error('client_id')
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
                         <x-input-label for="code" value="Code Site" />
-                        <x-text-input name="code" type="text" class="mt-1 block w-full" placeholder="Ex: SITE-CAS-01" />
+                        <x-text-input name="code" type="text" class="mt-1 block w-full" value="{{ old('code') }}" placeholder="Ex: SITE-CAS-01" />
+                        @error('code')
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <x-input-label for="city" value="Ville" />
-                        <x-text-input name="city" type="text" class="mt-1 block w-full" placeholder="Casablanca" />
+                        <x-text-input name="city" type="text" class="mt-1 block w-full" value="{{ old('city') }}" placeholder="Casablanca" />
+                        @error('city')
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
                         <x-input-label for="address" value="Adresse" />
-                        <x-text-input name="address" type="text" class="mt-1 block w-full"
+                        <x-text-input name="address" type="text" class="mt-1 block w-full" value="{{ old('address') }}"
                             placeholder="Route de Nouasseur" />
+                        @error('address')
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <x-input-label for="contact_name" value="Responsable Site" />
-                        <x-text-input name="contact_name" type="text" class="mt-1 block w-full"
+                        <x-text-input name="contact_name" type="text" class="mt-1 block w-full" value="{{ old('contact_name') }}"
                             placeholder="M. Bennani" />
+                        @error('contact_name')
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div>
                         <x-input-label for="contact_phone" value="Téléphone Contact" />
-                        <x-text-input name="contact_phone" type="text" class="mt-1 block w-full"
+                        <x-text-input name="contact_phone" type="text" class="mt-1 block w-full" value="{{ old('contact_phone') }}"
                             placeholder="+212 600 112233" />
+                        @error('contact_phone')
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
             </div>

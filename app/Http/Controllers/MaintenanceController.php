@@ -33,7 +33,10 @@ class MaintenanceController extends Controller
         }
 
         $maintenances = $query->orderBy('scheduled_at', 'desc')->paginate(15)->withQueryString();
-        $equipments = Equipment::where('is_consumable', false)->orderBy('name')->get();
+        $equipments = Equipment::where('is_consumable', false)
+            ->whereNotIn('status', ['Retired', 'Lost'])
+            ->orderBy('name')
+            ->get();
 
         return view('maintenances.index', compact('maintenances', 'equipments'));
     }

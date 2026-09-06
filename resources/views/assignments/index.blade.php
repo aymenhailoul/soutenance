@@ -182,72 +182,115 @@
 
     <!-- Create Assignment Modal -->
     <x-modal name="create-assignment" focusable>
-        <form method="POST" action="{{ route('assignments.store') }}" class="p-6">
+        <form method="POST" action="{{ route('assignments.store') }}" class="p-6"
+            x-data="{ targetType: '{{ old('client_id') ? 'client' : (old('site_id') ? 'site' : 'employee') }}' }">
             @csrf
             <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">Nouvelle Affectation d'Équipement</h3>
+
+            @if($equipments->isEmpty())
+                <div class="p-4 mb-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-md dark:bg-amber-900/30 dark:border-amber-700 dark:text-amber-300 text-sm">
+                    ⚠️ Aucun équipement disponible à l'affectation. Assurez-vous d'avoir des équipements non-consommables avec le statut <strong>Disponible</strong>.
+                </div>
+            @endif
+
             <div class="space-y-4">
                 <div>
-                    <x-input-label for="equipment_id" value="Équipement *" />
+                    <x-input-label for="equipment_id" value="Équipement (Disponibles uniquement) *" />
                     <select name="equipment_id"
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"
                         required>
                         <option value="">Sélectionner un équipement...</option>
                         @foreach($equipments as $eq)
-                            <option value="{{ $eq->id }}">
-                                {{ $eq->name }} (S/N: {{ $eq->serial_number ?? 'N/A' }}) - Statut: {{ $eq->status }}
+                            <option value="{{ $eq->id }}" {{ old('equipment_id') == $eq->id ? 'selected' : '' }}>
+                                {{ $eq->name }} (S/N: {{ $eq->serial_number ?? 'N/A' }})
                             </option>
                         @endforeach
                     </select>
+                    @error('equipment_id')
+                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <x-input-label for="employee_id" value="Employé (Utilisateur)" />
-                        <select name="employee_id"
-                            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
-                            <option value="">Aucun (Attribution au site/client)</option>
-                            @foreach($employees as $emp)
-                                <option value="{{ $emp->id }}">{{ $emp->name }}</option>
-                            @endforeach
-                        </select>
+
+                <div>
+                    <x-input-label for="assigned_at" value="Date d'affectation *" />
+                    <x-text-input name="assigned_at" type="datetime-local" class="mt-1 block w-full"
+                        value="{{ old('assigned_at', now()->format('Y-m-d\TH:i')) }}" required />
+                    @error('assigned_at')
+                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <!-- Target Selection (Radio Group) -->
+                <div class="border-t border-b border-gray-200 dark:border-gray-700 py-3">
+                    <x-input-label value="Bénéficiaire de l'affectation *" class="mb-2" />
+                    <div class="grid grid-cols-3 gap-3">
+                        <label class="flex items-center space-x-2 p-2 rounded border cursor-pointer text-sm"
+                            :class="targetType === 'employee' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 dark:border-indigo-500 font-semibold' : 'border-gray-300 dark:border-gray-700'">
+                            <input type="radio" name="target_type_radio" value="employee" x-model="targetType" class="text-indigo-600 focus:ring-indigo-500">
+                            <span class="text-gray-700 dark:text-gray-300">Employé</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 rounded border cursor-pointer text-sm"
+                            :class="targetType === 'client' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 dark:border-indigo-500 font-semibold' : 'border-gray-300 dark:border-gray-700'">
+                            <input type="radio" name="target_type_radio" value="client" x-model="targetType" class="text-indigo-600 focus:ring-indigo-500">
+                            <span class="text-gray-700 dark:text-gray-300">Client</span>
+                        </label>
+                        <label class="flex items-center space-x-2 p-2 rounded border cursor-pointer text-sm"
+                            :class="targetType === 'site' ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 dark:border-indigo-500 font-semibold' : 'border-gray-300 dark:border-gray-700'">
+                            <input type="radio" name="target_type_radio" value="site" x-model="targetType" class="text-indigo-600 focus:ring-indigo-500">
+                            <span class="text-gray-700 dark:text-gray-300">Site</span>
+                        </label>
                     </div>
-                    <div>
-                        <x-input-label for="assigned_at" value="Date d'affectation *" />
-                        <x-text-input name="assigned_at" type="datetime-local" class="mt-1 block w-full"
-                            value="{{ now()->format('Y-m-d\TH:i') }}" required />
+
+                    <div class="mt-3">
+                        <div x-show="targetType === 'employee'">
+                            <x-input-label for="employee_id" value="Sélectionner l'Employé *" />
+                            <select name="employee_id" :disabled="targetType !== 'employee'"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                <option value="">Choisir un employé...</option>
+                                @foreach($employees as $emp)
+                                    <option value="{{ $emp->id }}" {{ old('employee_id') == $emp->id ? 'selected' : '' }}>{{ $emp->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div x-show="targetType === 'client'">
+                            <x-input-label for="client_id" value="Sélectionner le Client *" />
+                            <select name="client_id" :disabled="targetType !== 'client'"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                <option value="">Choisir un client...</option>
+                                @foreach($clients as $c)
+                                    <option value="{{ $c->id }}" {{ old('client_id') == $c->id ? 'selected' : '' }}>{{ $c->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div x-show="targetType === 'site'">
+                            <x-input-label for="site_id" value="Sélectionner le Site *" />
+                            <select name="site_id" :disabled="targetType !== 'site'"
+                                class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
+                                <option value="">Choisir un site...</option>
+                                @foreach($sites as $s)
+                                    <option value="{{ $s->id }}" {{ old('site_id') == $s->id ? 'selected' : '' }}>{{ $s->name }} ({{ $s->client->name ?? 'ISS' }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @error('target')
+                            <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <x-input-label for="client_id" value="Client" />
-                        <select name="client_id"
-                            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
-                            <option value="">ISS Maroc (Interne)</option>
-                            @foreach($clients as $c)
-                                <option value="{{ $c->id }}">{{ $c->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <x-input-label for="site_id" value="Site d'affectation" />
-                        <select name="site_id"
-                            class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
-                            <option value="">Aucun site particulier</option>
-                            @foreach($sites as $s)
-                                <option value="{{ $s->id }}">{{ $s->name }} ({{ $s->client->name ?? 'ISS' }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
+
                 <div>
                     <x-input-label for="notes" value="Remarques / Motif" />
                     <textarea name="notes"
                         class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm"
-                        rows="2" placeholder="Motif de l'affectation, conditions..."></textarea>
+                        rows="2" placeholder="Motif de l'affectation, conditions...">{{ old('notes') }}</textarea>
+                    @error('notes')
+                        <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
             <div class="mt-6 flex justify-end gap-3">
                 <x-secondary-button x-on:click="$dispatch('close')">Annuler</x-secondary-button>
-                <x-primary-button>Enregistrer l'affectation</x-primary-button>
+                <x-primary-button :disabled="$equipments->isEmpty()">Enregistrer l'affectation</x-primary-button>
             </div>
         </form>
     </x-modal>
