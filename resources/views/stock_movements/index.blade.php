@@ -245,8 +245,8 @@
                 <!-- Site Transfer Fields -->
                 <div class="grid grid-cols-2 gap-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-md border border-gray-200 dark:border-gray-700" x-show="movementType === 'Transfert'" x-cloak>
                     <div>
-                        <x-input-label for="source_site_id" value="Site d'origine" />
-                        <select name="source_site_id" x-model="sourceSiteId"
+                        <x-input-label for="source_site_id" value="Site d'origine *" />
+                        <select name="source_site_id" x-model="sourceSiteId" :required="movementType === 'Transfert'"
                             class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm">
                             <option value="">Sélectionner site d'origine...</option>
                             @foreach($sites as $site)

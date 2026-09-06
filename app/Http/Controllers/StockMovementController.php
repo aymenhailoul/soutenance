@@ -42,8 +42,8 @@ class StockMovementController extends Controller
             'equipment_id' => ['required', 'integer', 'exists:equipment,id'],
             'movement' => ['required', 'string', 'in:Entrée,Sortie,Transfert'],
             'quantity' => ['required', 'integer', 'min:1', 'max:100000'],
-            'source_site_id' => ['nullable', 'integer', 'exists:sites,id'],
-            'destination_site_id' => ['nullable', 'integer', 'exists:sites,id'],
+            'source_site_id' => ['nullable', 'required_if:movement,Transfert', 'integer', 'exists:sites,id'],
+            'destination_site_id' => ['nullable', 'required_if:movement,Transfert', 'integer', 'exists:sites,id', 'different:source_site_id'],
             'prix_achat' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'comment' => ['nullable', 'string', 'max:1000'],
         ]);

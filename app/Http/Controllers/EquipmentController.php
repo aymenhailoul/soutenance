@@ -4,10 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Equipment;
+use App\Services\EquipmentService;
 use Illuminate\Http\Request;
 
 class EquipmentController extends Controller
 {
+    protected EquipmentService $equipmentService;
+
+    public function __construct(EquipmentService $equipmentService)
+    {
+        $this->equipmentService = $equipmentService;
+    }
+
     public function index(Request $request)
     {
         $relations = ['category'];
@@ -63,10 +71,10 @@ class EquipmentController extends Controller
             'purchase_date' => ['nullable', 'date', 'before_or_equal:now'],
             'purchase_price' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'warranty_end_date' => ['nullable', 'date', 'after_or_equal:purchase_date'],
-            'status' => ['required', 'string', 'in:Available,Assigned,In Maintenance,Broken,Retired,Lost'],
+            'status' => ['required', 'string', 'in:Available,Broken,Retired,Lost'],
             'condition' => ['required', 'string', 'in:New,Good,Fair,Damaged'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'quantity' => ['required', 'integer', 'min:0', 'max:100000'],
+            'quantity' => ['nullable', 'integer', 'min:0', 'max:100000'],
             'min_stock' => ['nullable', 'integer', 'min:0', 'max:100000'],
             'is_consumable' => ['nullable', 'boolean'],
         ]);
@@ -76,6 +84,8 @@ class EquipmentController extends Controller
         // Enforce quantity semantics: non-consumables represent single assets
         if (!$validated['is_consumable']) {
             $validated['quantity'] = 1;
+        } else {
+            $validated['quantity'] = (int) ($validated['quantity'] ?? 0);
         }
 
         $equipment = Equipment::create($validated);
@@ -118,21 +128,16 @@ class EquipmentController extends Controller
             'purchase_date' => ['nullable', 'date', 'before_or_equal:now'],
             'purchase_price' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'warranty_end_date' => ['nullable', 'date', 'after_or_equal:purchase_date'],
-            'status' => ['required', 'string', 'in:Available,Assigned,In Maintenance,Broken,Retired,Lost'],
+            'status' => ['nullable', 'string', 'in:Available,Broken,Retired,Lost'],
             'condition' => ['required', 'string', 'in:New,Good,Fair,Damaged'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'quantity' => ['required', 'integer', 'min:0', 'max:100000'],
             'min_stock' => ['nullable', 'integer', 'min:0', 'max:100000'],
             'is_consumable' => ['nullable', 'boolean'],
         ]);
 
         $validated['is_consumable'] = $request->has('is_consumable');
 
-        if (!$validated['is_consumable']) {
-            $validated['quantity'] = 1;
-        }
-
-        $equipment->update($validated);
+        $this->equipmentService->updateEquipment($equipment, $validated);
 
         return redirect()->route('equipment.show', $equipment)->with('success', 'Équipement mis à jour avec succès.');
     }

@@ -96,21 +96,78 @@ class EquipmentTest extends TestCase
             'status' => 'Available',
             'condition' => 'Fair',
             'quantity' => 1,
+            'is_consumable' => false,
         ]);
 
         $response = $this->actingAs($this->user)->put(route('equipment.update', $equipment), [
             'name' => 'Équipement Mis à Jour',
-            'status' => 'Assigned',
+            'status' => 'Broken',
             'condition' => 'Good',
-            'quantity' => 2,
         ]);
 
         $response->assertRedirect(route('equipment.show', $equipment));
         $this->assertDatabaseHas('equipment', [
             'id' => $equipment->id,
             'name' => 'Équipement Mis à Jour',
-            'status' => 'Assigned',
+            'status' => 'Broken',
+            'condition' => 'Good',
+            'quantity' => 1,
         ]);
+    }
+
+    public function test_cannot_set_assigned_or_in_maintenance_status_via_generic_edit(): void
+    {
+        $equipment = Equipment::create([
+            'name' => 'Équipement Test',
+            'status' => 'Available',
+            'condition' => 'Good',
+            'quantity' => 1,
+            'is_consumable' => false,
+        ]);
+
+        $response = $this->actingAs($this->user)->put(route('equipment.update', $equipment), [
+            'name' => 'Équipement Test',
+            'status' => 'Assigned',
+            'condition' => 'Good',
+        ]);
+
+        $response->assertSessionHasErrors('status');
+        $this->assertEquals('Available', $equipment->fresh()->status);
+    }
+
+    public function test_cannot_change_is_consumable_when_operational_history_exists(): void
+    {
+        $equipment = Equipment::create([
+            'name' => 'Imprimante HP',
+            'status' => 'Available',
+            'condition' => 'Good',
+            'quantity' => 1,
+            'is_consumable' => false,
+        ]);
+
+        $employee = \App\Models\Employee::create([
+            'name' => 'Jean Dupont',
+            'cin' => 'AB123456',
+            'salary' => 5000.00,
+            'joined_at' => '2025-01-01',
+        ]);
+
+        // Create assignment history
+        \App\Models\EquipmentAssignment::create([
+            'equipment_id' => $equipment->id,
+            'employee_id' => $employee->id,
+            'assigned_at' => now(),
+            'status' => 'Returned',
+        ]);
+
+        $response = $this->actingAs($this->user)->put(route('equipment.update', $equipment), [
+            'name' => 'Imprimante HP',
+            'condition' => 'Good',
+            'is_consumable' => true,
+        ]);
+
+        $response->assertSessionHasErrors('is_consumable');
+        $this->assertFalse((bool) $equipment->fresh()->is_consumable);
     }
 
     public function test_can_delete_equipment(): void

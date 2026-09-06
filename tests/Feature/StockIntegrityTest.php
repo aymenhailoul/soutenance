@@ -79,8 +79,15 @@ class StockIntegrityTest extends TestCase
         $this->assertEquals(10, $this->consumable->fresh()->quantity); // Stock remains unchanged!
     }
 
-    public function test_stock_transfer_between_sites_records_locations(): void
+    public function test_stock_transfer_between_sites_records_locations_and_updates_site_stocks(): void
     {
+        // First initialize stock at siteA
+        \App\Models\SiteStock::create([
+            'equipment_id' => $this->consumable->id,
+            'site_id' => $this->siteA->id,
+            'quantity' => 10,
+        ]);
+
         $response = $this->actingAs($this->user)->post(route('stock.store'), [
             'equipment_id' => $this->consumable->id,
             'movement' => 'Transfert',
@@ -99,5 +106,56 @@ class StockIntegrityTest extends TestCase
             'source_site_id' => $this->siteA->id,
             'destination_site_id' => $this->siteB->id,
         ]);
+
+        // Source site decreased from 10 to 7
+        $this->assertDatabaseHas('site_stocks', [
+            'equipment_id' => $this->consumable->id,
+            'site_id' => $this->siteA->id,
+            'quantity' => 7,
+        ]);
+
+        // Destination site increased from 0 to 3
+        $this->assertDatabaseHas('site_stocks', [
+            'equipment_id' => $this->consumable->id,
+            'site_id' => $this->siteB->id,
+            'quantity' => 3,
+        ]);
+
+        // Total equipment quantity remains 10
+        $this->assertEquals(10, $this->consumable->fresh()->quantity);
+    }
+
+    public function test_bulk_stock_movement_on_non_consumable_is_rejected(): void
+    {
+        $laptop = Equipment::create([
+            'name' => 'Dell Latitude 5420',
+            'is_consumable' => false,
+            'quantity' => 1,
+            'status' => 'Available',
+            'condition' => 'New',
+        ]);
+
+        $response = $this->actingAs($this->user)->post(route('stock.store'), [
+            'equipment_id' => $laptop->id,
+            'movement' => 'Entrée',
+            'quantity' => 5,
+            'comment' => 'Essai d\'ajout en masse',
+        ]);
+
+        $response->assertSessionHasErrors('movement');
+        $this->assertEquals(1, $laptop->fresh()->quantity);
+    }
+
+    public function test_transfer_with_same_source_and_destination_is_rejected(): void
+    {
+        $response = $this->actingAs($this->user)->post(route('stock.store'), [
+            'equipment_id' => $this->consumable->id,
+            'movement' => 'Transfert',
+            'quantity' => 2,
+            'source_site_id' => $this->siteA->id,
+            'destination_site_id' => $this->siteA->id,
+        ]);
+
+        $response->assertSessionHasErrors('destination_site_id');
     }
 }

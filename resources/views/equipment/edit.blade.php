@@ -180,7 +180,6 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantité Actuelle</label>
                         @if($equipment->is_consumable)
-                            <input type="hidden" name="quantity" value="{{ $equipment->quantity }}">
                             <div class="flex items-center gap-2">
                                 <div class="px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-sm font-bold text-gray-900 dark:text-white flex-1">
                                     {{ $equipment->quantity }} unités
@@ -189,9 +188,8 @@
                                     Ajuster le stock
                                 </a>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1">Modifier la quantité via les Mouvements de Stock</p>
+                            <p class="text-xs text-gray-500 mt-1">La quantité s'ajuste uniquement via les Mouvements de Stock</p>
                         @else
-                            <input type="hidden" name="quantity" value="1">
                             <input type="number" value="1" readonly
                                 class="w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-sm text-gray-500 cursor-not-allowed">
                             <p class="text-xs text-gray-500 mt-1">Matériel individuel (Quantité = 1)</p>
@@ -214,15 +212,10 @@
 
             <!-- Submit buttons -->
             <div class="flex justify-between items-center pt-4 border-t border-gray-200 dark:border-gray-700">
-                <form method="POST" action="{{ route('equipment.destroy', $equipment) }}"
-                    onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet équipement ?')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                        class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 dark:text-rose-300 text-sm font-medium rounded-lg transition-colors">
-                        Supprimer
-                    </button>
-                </form>
+                <button type="submit" form="delete-equipment-form-{{ $equipment->id }}"
+                    class="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:hover:bg-rose-900/50 dark:text-rose-300 text-sm font-medium rounded-lg transition-colors">
+                    Archiver / Supprimer
+                </button>
                 <div class="flex gap-3">
                     <a href="{{ route('equipment.show', $equipment) }}"
                         class="px-4 py-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium rounded-lg">
@@ -234,6 +227,12 @@
                     </button>
                 </div>
             </div>
+        </form>
+
+        <form id="delete-equipment-form-{{ $equipment->id }}" method="POST" action="{{ route('equipment.destroy', $equipment) }}"
+            onsubmit="return confirm('Êtes-vous sûr de vouloir archiver cet équipement ?')">
+            @csrf
+            @method('DELETE')
         </form>
     </div>
 @endsection

@@ -33,8 +33,16 @@ class MaintenanceService
                 ]);
             }
 
-            if (in_array($equipment->status, ['Broken', 'Retired', 'Lost']) && !in_array($data['status'], ['Cancelled'])) {
-                // Allowed if corrective maintenance
+            if ($data['status'] === 'In Progress') {
+                $hasActiveMaintenance = Maintenance::where('equipment_id', $equipment->id)
+                    ->where('status', 'In Progress')
+                    ->exists();
+
+                if ($hasActiveMaintenance) {
+                    throw ValidationException::withMessages([
+                        'status' => 'Une intervention de maintenance est déjà en cours pour cet équipement.',
+                    ]);
+                }
             }
 
             if ($data['status'] === 'Completed' && empty($data['completed_at'])) {

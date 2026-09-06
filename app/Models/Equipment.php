@@ -75,6 +75,34 @@ class Equipment extends Model
         return $this->belongsTo(Site::class, 'site_id');
     }
 
+    public function siteStocks()
+    {
+        return $this->hasMany(SiteStock::class, 'equipment_id');
+    }
+
+    public function getStockAtSite(?int $siteId): int
+    {
+        if (!$siteId) {
+            return $this->quantity;
+        }
+
+        $siteStock = $this->siteStocks()->where('site_id', $siteId)->first();
+        if ($siteStock) {
+            return $siteStock->quantity;
+        }
+
+        if ((int)$this->site_id === (int)$siteId) {
+            return $this->quantity;
+        }
+
+        return 0;
+    }
+
+    public function hasOperationalHistory(): bool
+    {
+        return $this->assignments()->exists() || $this->maintenances()->exists() || $this->stockMovements()->exists();
+    }
+
     public function isConsumable(): bool
     {
         return (bool) $this->is_consumable;
