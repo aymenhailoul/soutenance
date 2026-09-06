@@ -117,7 +117,7 @@
             </svg>
         </button>
         <div class="flex items-center gap-2">
-            <img src="{{ asset('images/logo-iss-maroc.png') }}" alt="ISS Maroc" class="h-8 w-auto">
+            <img src="{{ asset('images/logo-iss-maroc.png') }}" alt="ISS Maroc" class="w-8 h-8 rounded-lg object-cover">
             <span class="font-bold text-gray-700 dark:text-gray-200">ISS MAROC</span>
         </div>
         <div class="w-10"></div>
@@ -141,7 +141,7 @@
 
             <!-- Logo/Title -->
             <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                <img src="{{ asset('images/logo-iss-maroc.png') }}" alt="ISS Maroc" class="h-10 w-auto object-contain flex-shrink-0">
+                <img src="{{ asset('images/logo-iss-maroc.png') }}" alt="ISS Maroc" class="w-10 h-10 rounded-lg object-cover flex-shrink-0">
                 <h1 class="text-xl font-bold text-gray-700 dark:text-gray-200 ml-3 sidebar-title">ISS MAROC</h1>
             </div>
 

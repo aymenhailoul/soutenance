@@ -18,7 +18,7 @@
 <body class="bg-gray-100 dark:bg-gray-900 min-h-screen flex items-center justify-center p-5 transition-colors duration-200">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-12 w-full max-w-md transition-colors duration-200">
         <div class="flex flex-col items-center mb-6">
-            <img src="{{ asset('images/logo-iss-maroc.png') }}" alt="ISS Maroc" class="h-16 w-auto mb-4 object-contain">
+            <img src="{{ asset('images/logo-iss-maroc.png') }}" alt="ISS Maroc" class="w-20 h-20 rounded-2xl shadow-md mb-4 object-cover">
             <h1 class="text-3xl font-bold text-gray-700 dark:text-gray-100 text-center">ISS MAROC</h1>
         </div>
         <p class="text-center text-gray-600 dark:text-gray-400 text-base mb-8">Connectez-vous à votre compte</p>
